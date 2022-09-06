@@ -1,2 +1,2 @@
-# phys512
-Repo for PHYS-512 class
+# PHYS-512
+Christian Denis' repo for PHYS-512 class
