@@ -6,7 +6,7 @@ By Christian Mauffette Denis
 
 ### a)
 
-We can use a different formula to compute the derivative using the given points. We know that 
+We can use a different formula to compute the derivative using the given points. We know that
 
 $$f(x + \delta) = f(x) + f'(x) \delta + \frac{f''(x)}{2}\delta^2 + \frac{f'''(x)}{6}\delta^3 + \frac{f^{(4)}(x)}{24}\delta^4 + \frac{f^{(5)}(x)}{120}\delta^5 + ...  $$
 
@@ -23,18 +23,18 @@ $$f(x + \delta) - f(x - \delta) = 2 f'(x) \delta + \frac{ 2 f'''(x)}{6}\delta^3 
 $$ = 2 f'(x) \delta + \frac{ f'''(x)}{3}\delta^3 + \frac{ f^{(5)}(x)}{60}\delta^5 + ...  $$
 
 Now we subtract the two last expressions:
-    
+
 $$ f(x + 2\delta) - f(x - 2\delta) = 4 f'(x) \delta  + \frac{8 f'''(x)}{3}\delta^3 + \frac{8 f^{(5)}(x)}{15}\delta^5 + ...  $$
 
 This means we can get rid of the 3rd order corrections by doing:
 
 $$\frac{2}{3} \left((f(x + \delta)-f(x-\delta ))-\frac{1}{8} (f(x + 2 \delta)-f(x-2 \delta ))\right) = f'(x)\delta -\frac{1}{30} f^{(5)}(x) \delta^5 + O\left(x^6\right)$$
 
-Hence the error term is 
+Hence the error term is
 
 $$\frac{1}{30} f^{(5)}(x) \delta^4$$
 
-And the estimate will be 
+And the estimate will be
 
 $$\frac{2}{3 \delta} \left((f(x + \delta)-f(x-\delta ))-\frac{1}{8} (f(x + 2 \delta)-f(x-2 \delta ))\right)$$
 
@@ -54,7 +54,6 @@ $$ \frac{d}{d\delta} \left( \frac{7\epsilon}{6 \delta}  + \frac{1}{30} f^{(5)}(x
 
 $$\frac{2 \delta ^3 k}{15}-\frac{7 \epsilon }{6 \delta ^2} = 0 $$
 
-
 $$\implies \delta \approx \left( \frac{35 \epsilon}{4 f^{(5)}(x) } \right)^{1/5} $$
 
 So, assuming machine precision is about $10^{-16}$, then we have about
@@ -71,7 +70,40 @@ def deriv(func, x0, delta):
 
 With this function, we can pick a ```x0``` and then scan (logarithmically) through different ```delta``` values. For the function $e^{x}$ whose derivative is evaluated at $x=0$, this produces the following plot:
 
-![alt text](figs/q1_error_plot1.jpg)
+![q1_error_plot1](figs/q1_error_plot1.jpg)
 
 We can see on it the estimated optimal error is indeed in the $10^{-3}$ ballpark. Also, it was assumed that the fifth derivative is roughly of order 1, which is exactly right for our specific function, since $\frac{d^5}{dx^5} e^x = e^x$.
 
+Now we can try the same procedure, but for the $e^{0.01 x}$ function. Again, we scan the different deltas, and produce the following plot:
+
+![q1_error_plot2](figs/q1_error_plot2.jpg)
+
+For this plot the order of magnitude of the 5th derivative was in fact significant since $\frac{d^5}{dx^5} e^x = (0.01)^5e^x$. Hence, the optimal step size had to be divided by $0.01$ and after doing so, we see that it does indeed fall on the minimum of the curve for the error.
+
+## Question 2
+
+We now code a derivative taking function. We used the centered derivative for that. We simply use the formula
+
+$$\frac{f(x+\Delta x)-f(x - \Delta x)}{2 \Delta x} = f'(x)$$
+
+However, we must pick the appropriate $\Delta x$. If we look at the taylor expansion of the previous expression, we have
+
+$$f(x + \delta) = f(x) + f'(x) \delta + \frac{f''(x)}{2}\delta^2 + \frac{f'''(x)}{6}\delta^3 + \frac{f^{(4)}(x)}{24}\delta^4 + \frac{f^{(5)}(x)}{120}\delta^5 + ...  $$
+
+$$f(x - \delta) = f(x) - f'(x) + \frac{f''(x)}{2}\delta^2 - \frac{f'''(x)}{6}\delta^3 + \frac{f^{(4)}(x)}{24}\delta^4 - \frac{f^{(5)}(x)}{120}\delta^5 + ...  $$
+
+$$\implies \frac{f(x+\Delta x)-f(x - \Delta x)}{2 \Delta x} = \frac{1}{2 \Delta x}\left( 2 f'(x) \Delta x + \frac{f'''(x)}{3}\Delta x^3\right) + ...$$
+
+$$ =  f'(x)  + \frac{f'''(x)}{6}\Delta x^2 + ...$$
+
+Hence, the error is
+
+$$\text{error} \approx \frac{\epsilon}{\Delta x}  + \frac{f'''(x)}{6}\Delta x^2$$
+
+If we minimize it with respect to $\Delta x$, we have
+
+$$\Delta x \approx \left(\frac{3 \epsilon}{f'''(x)} \right)^{1/3}$$
+
+We will code a function that will find the 3rd derivative with a delta value that is not optimal and then use it that derivative to find the first derivative, but this time with a delta that is quite optimal. I am assuming that the error will be relatively small in the 3rd derivative, hence, it should not be too much of a problem since it's only used to roughly find the optimal value for the derivative.
+
+We still need to find some delta to use that is not too far-fetched for the three consecutive derivatives. In class we have seen that to minimize the error for such a derivative prescription (central), we must use $\Delta x \approx 10^{-5}$, assuming second derivatives are not too crazy and that our machine $\epsilon$ is $\approx 10^{-16}$.
