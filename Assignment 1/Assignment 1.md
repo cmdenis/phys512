@@ -78,7 +78,7 @@ Now we can try the same procedure, but for the $e^{0.01 x}$ function. Again, we 
 
 ![q1_error_plot2](figs/q1_error_plot2.jpg)
 
-For this plot the order of magnitude of the 5th derivative was in fact significant since $\frac{d^5}{dx^5} e^x = (0.01)^5e^x$. Hence, the optimal step size had to be divided by $0.01$ and after doing so, we see that it does indeed fall on the minimum of the curve for the error.
+For this plot the order of magnitude of the 5th derivative was in fact significant since $\frac{d^5}{dx^5} e^x = (0.01)^5e^x$. Hence, the optimal step size had to be divided by $0.01$ and after doing so, we see that it does indeed fall roughly on the minimum of the curve for the error.
 
 ## Question 2
 
