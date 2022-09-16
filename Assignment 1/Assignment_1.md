@@ -138,7 +138,7 @@ def ndiff(fun, x, full = False):
     # Conditional system for optional argument
     if full:
         # Returns derivative and estimated error
-        est_err = np.finfo(float).eps/opt_step + third_deriv*opt_step**2/6
+        est_err=np.finfo(float).eps/opt_step+third_deriv*opt_step**2/6
         return np.array([deriv, est_err])
     
     elif not full:
@@ -153,19 +153,19 @@ To answer this question we create the following function
 ```python
 def lakeshore(V, data):
     '''Function to interpolate the data with a cubic spline'''
-    temperatures = np.array([i[0] for i in data[::-1]]) # Making array for temperatures (from raw data)
-    voltages = np.array([i[1] for i in data[::-1]]) # Making array for volatages (from raw data)
+    temperatures = np.array([i[0] for i in data[::-1]]) # temperatures array (from raw data)
+    voltages = np.array([i[1] for i in data[::-1]]) # voltages array (from raw data)
     approx_vol_size = abs(voltages[2]-voltages[1])
     
     # First we find the interpolation
-    cs = sci.interpolate.CubicSpline(voltages, temperatures) # spline function
+    cs = sci.interpolate.CubicSpline(voltages, temperatures) # spline
     inter_val = cs(V)
 
     # Now we roughly estimate the error
     lin_spline = sci.interpolate.interp1d(voltages, temperatures) # Linear interpolation
-    err_range = np.array(np.linspace(V-approx_vol_size, V+approx_vol_size, 1000))
+    err_range=np.array(np.linspace(V-approx_vol_size, V+approx_vol_size,1000))
 
-    approx_error = np.std(abs(lin_spline(err_range) - cs(err_range)), axis = 0)
+    approx_error=np.std(abs(lin_spline(err_range)-cs(err_range)),axis=0)
 
 
     return inter_val, approx_error
@@ -219,4 +219,18 @@ Just like for the $\cos$ function, we interpolate the Lorentzian function, $\fra
 
 In this case the cubic spline does a better job than the polynomial fit. The rational function produces and error that is essentially 0, being non-zero due to the machine doing linear algebra. This makes sense since the Lorentzian is essentially a rational function.
 
-If we increase the order, we have observed that the fit remains good, however, there is an exception when we have an odd number of evenly spaced points: the rational function blows up at $x=0$. This is with the ```np.linalg.inv``` function.
+If we increase the order, we have observed that the rational fit starts becoming way off. This is with the ```np.linalg.inv``` function, 10 sample points, $n=4$, and $n=5$:
+
+![q4_interp3](figs/q4_interp3.jpg)
+
+![q4_resi3](figs/q4_resi3.jpg)
+
+This is very wrong... but when we switch the ```np.linalg.inv``` function to the ```np.linalg.pinv``` function we obtain virtually no error again (for the rational function):
+
+![q4_interp4](figs/q4_interp4.jpg)
+
+![q4_resi4](figs/q4_resi4.jpg)
+
+Now, I'll be honest, I am not 100% sure of the reason why this happens, but here is an attempt at an explanation:
+
+I know that the difference between ```pinv``` and ```inv``` is that ```pinv``` finds the "generalized inverse" or "pseudo-inverse" of the input matrix as opposed to the regular inverse. From what I've understood by reading things online, the pseudo-inverse "takes care" of infinities caused by machine precision. If I had to guess, I would think that these infinities arrize because we are trying to overfit a function that is already a rational (the Lorentzian) to another rational that is of much higher degree. I thinks that this means there are more than one coefficient configurations that can work i.e there are free variables, thus making the input matrix non-invertible. I think this is also why we chose to set the constant term in the denominator to 1: we don't loose any generality by doing that since we are losing a degree of freedom when taking the fraction (e.g $\frac{1}{2}=\frac{2}{4}$). If we didn't remove the factor for the 1, we'd be having a degeneracy in the coefficient.
