@@ -189,4 +189,12 @@ The first is a polynomial fit of degree $n-1$ where $n$ is the number of samples
 
 The second interpolation scheme used was a cubic spine. Similarly to the polynomial fit, we used ```scipy```'s ```polyfit```'s ```interpolate.CubicSpline``` function.
 
+For the third interpolation scheme (the rational function). We proceeded the same way that was taught in class. We used a polynomial as a numerator and another polynomial as denominator. Each coefficient can be controlled separetely. We used ```scipy```'s ```linalg``` package to solve the linear algebra problem that is finding the coefficients of the polynomials.
+
+For the $\cos$ function we obtained the following fit and residuals:
+
+![q4_interp1](figs/q4_interp1.jpg)
+
+![q4_resi1](figs/q4_resi1.jpg)
+
 ### Lorentzian
