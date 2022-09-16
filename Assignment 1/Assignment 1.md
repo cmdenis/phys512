@@ -166,6 +166,10 @@ def lakeshore(V, data):
     return inter_val, approx_error
 ```
 
-This function takes as input the value(s) we want to evaluate at an interpolated value and the raw data to create the interpolation. The function starts by extracting arrays for the temperature and the voltages from the raw data. From these $x$ and $y$ set of data, we are able to create the interpolation. To find the error on the obtained values, we create another interpolation, but this time linear. We look at the difference between the linear and the cubic splined interpolations to obtain a rough estimate for the error. This difference should give us roughly an order of magnitude estimate of the error. The rationale behinnd it is that the cubic spline can be "curvier" than the actual data, while the linear fit is often not curvy enough, hence the true value is hypothesized to fall within the two fit. This is where this substraction came from. 
+This function takes as input the value(s) we want to evaluate at an interpolated value and the raw data to create the interpolation. The function starts by extracting arrays for the temperature and the voltages from the raw data. From these $x$ and $y$ set of data, we are able to create the interpolation. To find the error on the obtained values, we create another interpolation, but this time linear. We look at the difference between the linear and the cubic splined interpolations to obtain a rough estimate for the error. This difference should give us roughly an order of magnitude estimate of the error. The rationale behinnd it is that the cubic spline can be "curvier" than the actual data, while the linear fit is often not curvy enough, hence the true value is hypothesized to fall within the two fit. This is where this substraction came from.
 
 All this is down with arrays, so the function can work with both single value or arrays for ```V```. It will return two elements, the first is either an array or single value for the interpolated value and the second is the rough estimate for the error (also as array or value).
+
+The interpolation can be observed in the following plot:
+
+![q3_interp_plot](figs/q3_interp_plot.jpg)
