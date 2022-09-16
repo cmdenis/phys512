@@ -86,7 +86,7 @@ We now code a derivative taking function. We used the centered derivative for th
 
 $$\frac{f(x+\Delta x)-f(x - \Delta x)}{2 \Delta x} = f'(x)$$
 
-However, we must pick the appropriate $\Delta x$. If we look at the taylor expansion of the previous expression, we have
+However, we must pick the appropriate $\Delta x$. If we look at the Taylor expansion of the previous expression, we have
 
 $$f(x + \delta) = f(x) + f'(x) \delta + \frac{f''(x)}{2}\delta^2 + \frac{f'''(x)}{6}\delta^3 + \frac{f^{(4)}(x)}{24}\delta^4 + \frac{f^{(5)}(x)}{120}\delta^5 + ...  $$
 
@@ -140,3 +140,32 @@ def ndiff(fun, x, full = False):
         # Returns only derivative
         return deriv
 ```
+
+## Question 3
+
+To answer this question we create the following function
+
+```python
+def lakeshore(V, data):
+    '''Function to interpolate the data with a cubic spline'''
+    temperatures = np.array([i[0] for i in data[::-1]]) # Making array for temperatures (from raw data)
+    voltages = np.array([i[1] for i in data[::-1]]) # Making array for volatages (from raw data)
+    approx_vol_size = abs(voltages[2]-voltages[1])
+    
+    # First we find the interpolation
+    cs = sci.interpolate.CubicSpline(voltages, temperatures) # spline function
+    inter_val = cs(V)
+
+    # Now we roughly estimate the error
+    lin_spline = sci.interpolate.interp1d(voltages, temperatures) # Linear interpolation
+    err_range = np.array(np.linspace(V-approx_vol_size, V+approx_vol_size, 1000))
+
+    approx_error = np.std(abs(lin_spline(err_range) - cs(err_range)), axis = 0)
+
+
+    return inter_val, approx_error
+```
+
+This function takes as input the value(s) we want to evaluate at an interpolated value and the raw data to create the interpolation. The function starts by extracting arrays for the temperature and the voltages from the raw data. From these $x$ and $y$ set of data, we are able to create the interpolation. To find the error on the obtained values, we create another interpolation, but this time linear. We look at the difference between the linear and the cubic splined interpolations to obtain a rough estimate for the error. This difference should give us roughly an order of magnitude estimate of the error. The rationale behinnd it is that the cubic spline can be "curvier" than the actual data, while the linear fit is often not curvy enough, hence the true value is hypothesized to fall within the two fit. This is where this substraction came from. 
+
+All this is down with arrays, so the function can work with both single value or arrays for ```V```. It will return two elements, the first is either an array or single value for the interpolated value and the second is the rough estimate for the error (also as array or value).
