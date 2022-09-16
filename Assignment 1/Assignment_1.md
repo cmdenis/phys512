@@ -173,3 +173,15 @@ All this is down with arrays, so the function can work with both single value or
 The interpolation can be observed in the following plot:
 
 ![q3_interp_plot](figs/q3_interp_plot.jpg)
+
+## Question 4
+
+### $\cos (x)$
+
+We create three different interpolations for samples of the $\cos (x)$ function.
+
+The first is a polynomial fit of degree $n-1$ where $n$ is the number of samples used. ```scipy```'s ```polyfit``` function was used for that.
+
+The second interpolation scheme used was a cubic spine. Similarly to the polynomial fit, we used ```scipy```'s ```polyfit```'s ```interpolate.CubicSpline``` function.
+
+### Lorentzian
