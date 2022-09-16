@@ -42,7 +42,7 @@ $$\frac{2}{3 \delta} \left((f(x + \delta)-f(x-\delta ))-\frac{1}{8} (f(x + 2 \de
 
 ### b)
 
-If the roundoff error is $\epsilon$, then the error is bounded by
+If the roundoff error is $\epsilon$, then the error is bounded by the truncation error and the machine error:
 
 $$\frac{2}{3 \delta} \left(\epsilon-(-\epsilon)-\frac{1}{8} ((-\epsilon)-\epsilon)\right) + \frac{1}{30} f^{(5)}(x) \delta^4 = \text{error}$$
 
@@ -59,7 +59,6 @@ $$\frac{2 \delta ^3 k}{15}-\frac{7 \epsilon }{6 \delta ^2} = 0 $$
 $$\implies \delta \approx \left( \frac{35 \epsilon}{4 f^{(5)}(x) } \right)^{1/5} $$
 
 So, assuming machine precision is about $10^{-16}$, then we have about
-
 
 $$\delta \approx 10^{-16/5} \approx 10^{-3.2}$$
 
@@ -116,12 +115,13 @@ We still need to find some delta to use that is not too far-fetched for the thre
 ```python
 
 def ndiff(fun, x, full = False):
-    '''Function to take a derivate. Optional: can output the estimated error on the result.'''
+    '''Function to take a derivate. 
+    Optional: can output the estimated error on the result.'''
     
     ini_step = 10**-5 # Initial step size (for third derivative)
     
     # Anonymous function to take derivatives
-    diff_op = lambda func, x: (func(x + ini_step) - func(x - ini_step))/(2*ini_step)
+    diff_op=lambda func, x: (func(x+ini_step)-func(x-ini_step))/(2*ini_step)
 
     deriv_1 = lambda x: diff_op(fun, x)     # Calculating the first derivative
     deriv_2 = lambda x: diff_op(deriv_1, x) # Calculating the second derivative
@@ -213,4 +213,10 @@ Just like for the $\cos$ function, we interpolate the Lorentzian function, $\fra
 
 ![q4_resi2](figs/q4_resi2.jpg)
 
-In this case the cubic spline does a better job than the polynomial fit. The rational function produces and error that is essentially 0. This makes sense since the Lorentzian is essentially a rational function.
+- The error for the polynomial interpolation is 0.043
+- The error for the cubic spline interpolation is 0.023
+- The error for the rational function interpolation is 7.99e-17
+
+In this case the cubic spline does a better job than the polynomial fit. The rational function produces and error that is essentially 0, being non-zero due to the machine doing linear algebra. This makes sense since the Lorentzian is essentially a rational function.
+
+If we increase the order, we have observed that the fit remains good, however, there is an exception when we have an odd number of evenly spaced points: the rational function blows up at $x=0$. This is with the ```np.linalg.inv``` function.
