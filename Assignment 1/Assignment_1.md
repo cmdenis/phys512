@@ -197,4 +197,12 @@ For the $\cos$ function we obtained the following fit and residuals:
 
 ![q4_resi1](figs/q4_resi1.jpg)
 
+The errors for these are:
+
+The error for the polynomial interpolation is 0.0065
+
+The error for the cubic spline interpolation is 0.0038
+
+The error for the rational function interpolation is 0.0065
+
 ### Lorentzian
