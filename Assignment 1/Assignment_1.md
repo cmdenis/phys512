@@ -207,6 +207,10 @@ We see that interpolation with the least error is the polynomial fit. A possible
 
 ### Lorentzian
 
+Just like for the $\cos$ function, we interpolate the Lorentzian function, $\frac{1}{1+x^2}$. The result for 5 sample points can be seen:
+
 ![q4_interp2](figs/q4_interp2.jpg)
 
 ![q4_resi2](figs/q4_resi2.jpg)
+
+In this case the cubic spline does a better job than the polynomial fit. The rational function produces and error that is essentially 0. This makes sense since the Lorentzian is essentially a rational function.
