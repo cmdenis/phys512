@@ -206,3 +206,7 @@ The error for the cubic spline interpolation is 0.0038
 The error for the rational function interpolation is 0.0065
 
 ### Lorentzian
+
+![q4_interp2](figs/q4_interp2.jpg)
+
+![q4_resi2](figs/q4_resi2.jpg)
