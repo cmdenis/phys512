@@ -2,11 +2,13 @@
 
 By Christian Mauffette Denis
 
+For PHYS-512
+
 ## Question 1
 
 ### a)
 
-We can use a different formula to compute the derivative using the given points. We know that
+We want to compute the derivative using the given 4 points. We know that
 
 $$f(x + \delta) = f(x) + f'(x) \delta + \frac{f''(x)}{2}\delta^2 + \frac{f'''(x)}{6}\delta^3 + \frac{f^{(4)}(x)}{24}\delta^4 + \frac{f^{(5)}(x)}{120}\delta^5 + ...  $$
 
@@ -58,17 +60,20 @@ $$\implies \delta \approx \left( \frac{35 \epsilon}{4 f^{(5)}(x) } \right)^{1/5}
 
 So, assuming machine precision is about $10^{-16}$, then we have about
 
+
 $$\delta \approx 10^{-16/5} \approx 10^{-3.2}$$
 
 We can now try this with code by evaluating the given functions with our derivative. First we create the derivative taking function.
 
 ```python
-# Function to take the derivative at some point with a given step size
+# take the derivative with a given step size
 def deriv(func, x0, delta):
-    return 2/(3*delta) * (func(x0 + delta) - func(x0 - delta) - 1/8*(func(x0 + 2*delta) - func(x0 - 2*delta)))
+    pt1 = func(x0 + delta) - func(x0 - delta)
+    pt2 = 1/8*(func(x0 + 2*delta) - func(x0 - 2*delta))
+    return 2/(3*delta) * (pt1 - pt2)
 ```
 
-With this function, we can pick a ```x0``` and then scan (logarithmically) through different ```delta``` values. For the function $e^{x}$ whose derivative is evaluated at $x=0$, this produces the following plot:
+With this function, we can pick a ```x0``` and then scan (logarithmically) through different ```delta``` values. For the function $e^{x}$ whose derivative is evaluated at $x=0$, this produces figure 1.
 
 ![q1_error_plot1](figs/q1_error_plot1.jpg)
 
