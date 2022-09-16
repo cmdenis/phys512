@@ -199,11 +199,11 @@ For the $\cos$ function we obtained the following fit and residuals:
 
 The errors for these are:
 
-The error for the polynomial interpolation is 0.0065
+- The error for the polynomial interpolation is 0.00073
+- The error for the cubic spline interpolation is 0.0034
+- The error for the rational function interpolation is 0.0011
 
-The error for the cubic spline interpolation is 0.0038
-
-The error for the rational function interpolation is 0.0065
+We see that interpolation with the least error is the polynomial fit. A possible explanation is that the $\cos$ function is very well approximated by the first terms of a Taylor series. The rational function does not make as good of a job but close. This is most likely because of the distribution of the degrees of freedom between the numerator and denominator. The degrees of freedom in the denominator are possibly not as useful as the ones in the numerator. The cubic spline does the least good job at approximating it.
 
 ### Lorentzian
 
