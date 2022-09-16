@@ -73,7 +73,7 @@ def deriv(func, x0, delta):
     return 2/(3*delta) * (pt1 - pt2)
 ```
 
-With this function, we can pick a ```x0``` and then scan (logarithmically) through different ```delta``` values. For the function $e^{x}$ whose derivative is evaluated at $x=0$, this produces figure 1.
+With this function, we can pick a ```x0``` and then scan (logarithmically) through different ```delta``` values. For the function $e^{x}$ whose derivative is evaluated at $x=0$, this produces the following figure:
 
 ![q1_error_plot1](figs/q1_error_plot1.jpg)
 
@@ -125,7 +125,7 @@ def ndiff(fun, x, full = False):
 
     deriv_1 = lambda x: diff_op(fun, x)     # Calculating the first derivative
     deriv_2 = lambda x: diff_op(deriv_1, x) # Calculating the second derivative
-    deriv_3 = lambda x: diff_op(deriv_1, x) # Calculating the thirs derivative
+    deriv_3 = lambda x: diff_op(deriv_1, x) # Calculating the third derivative
     
     # Optimal step size
     third_deriv = deriv_3(x)
