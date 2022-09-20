@@ -22,6 +22,7 @@ def integrate(fun,a,b,tol):
         int2=integrate(fun,mid,b,tol/2)
         return int1+int2
 
+# To answer the question, we should basically pass the x vector in the extra argument and then we will only need to compute two of the 5 values of the vector
 
 ans=integrate(offset_gauss,-4,6,1e-6)
 ans2=integrate(offset_gauss,-4,0,1e-6)+integrate(offset_gauss,0,6,1e-6)
