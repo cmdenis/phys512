@@ -18,7 +18,6 @@ We can plot this function (with a total charge on the ring of 1 $C$, which is ad
 
 We see that as we get further away from the source in the positive axis we get pulled back towards it and similarly for the negative direction. When we are dead at the center of the ring, the symmetry creates a 0 field.
 
-
 ## Question 3
 
 ### Part a)
