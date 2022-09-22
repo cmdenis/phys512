@@ -87,6 +87,26 @@ If we managed to make such a function, following the same reasoning as before th
 
 ### Part a)
 
+To answer this question we create the following function:
+
+```python
+def cheb_log2(x):
+    return np.polynomial.chebyshev.Chebyshev(
+        [-4.56893394e-01, 4.95054673e-01, -4.24689768e-02, 4.85768297e-03, -6.25084976e-04, 8.57981013e-05, -1.22671891e-05, 1.80404306e-06]
+    )((x - 0.75) * 4)
+```
+
+This function was obtained by fitting 20 points of the $\log_2$ function. This function was actually rescaled from the $[0.5, 1]$ interval to the $[-1, 1]$ interval. Technically we were fitting the function
+
+$$\log_2\left(4\cdot(x - 0.75) \right)$$
+
+We obtained the appropriate coefficients for the fitted Chebyshev polynomials using `numpy`'s `polynomial.chebyshev.chebfit` function. This returns an array that contains the coefficient. We originally had 20 coefficients, but we truncated them so that the error falls in the desired bound of $10^{-6}$. This is pretty simple to do since we know that the Chebyshev polynomials are bounded by 1. This means that the maximum error on the function is the magnitude of the coefficient of the last term of the series. This leads us to pick a 9th order Chebyshev polynomial, which is the first one with a coefficient below $10^{-6}$. This indeed produces sensible result as can attest the following plots:
+
+![a2q2_logfunc_comparison](figs/a2q2_logfunc_comparison.jpg)
+![a2q2_residuals](figs/a2q2_residuals.jpg)
+
+Once the coefficients are obtained, we used the `polynomial.chebyshev.Chebyshev` `numpy` function to evaluate the Chebyshev polynomials. We must actually rescale the input so that it goes from the $[0.5, 1]$ interval to $[-1, 1]$ interval. This is easily done by transforming the input like `(x-0.75)*4`.
+
 ### Part b)
 
 The function `np.frexp` decomposes numbers into their mantissa and exponent. In other words, for a value "x", it breaks it down into $C$ and $N$, where those three number are related by
@@ -105,4 +125,16 @@ The first term is simply an evaluation of the function we wrote in **Part a**, h
 def mylog2(x):
     mantissa, expo = np.frexp(x)
     return cheb_log2(x) + expo
+```
+
+We can see that this function actually works by looking at the plotted function and its residuals:
+
+![a2q3_partb](figs/a2q3_partb.jpg)
+![a2q3_partb_residuals](figs/a2q3_partb_residuals.jpg)
+
+If we want to take the natural log of a function, then it's pretty straighforwards, we simply use the log properties and make the function:
+
+```python
+def mylog(x):
+    return mylog2(x)/np.exp(1)
 ```
