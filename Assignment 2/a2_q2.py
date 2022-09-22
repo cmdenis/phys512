@@ -48,17 +48,34 @@ def integrate_adaptive(fun, a, b, tol, extra = None):
         return int1+int2
 
 
-def integrate_adaptive(fun, a, b, tol, extra = None):
+def integrate_adaptive(fun, a, b, tol, extra = None, sub_div = 5):
     print('calling adaptive function from ', a, b)
-    sub_div = 5
     if extra == None:
         x = np.linspace(a, b, sub_div)
         dx = x[1] - x[0]
         y = fun(x)
     else:
-        x = np.linspace(a, b, sub_div)
-        dx = x[1] - x[0]
-        y = np.array([extra[0], fun(x[1]), extra[1], fun(x[3]), extra[2]])
+
+        new_int = b - a # Size of interval
+
+        dx = new_int/(nb_sub-1) # Step size
+
+        x = np.linspace(a, b, sub_div) # Get regular linspace
+
+        y = fun(
+            np.linspace(
+                a + dx, 
+                b - dx, 
+                int((nb_sub - 1)/2)
+                )
+            ) # Evaluate the function only at the points we have not evaluated yet
+
+        y = np.insert(
+            second_array, 
+            np.arange(int((nb_sub+1)/2)).astype(int), 
+            first_array[:int((nb_sub - 1)/2)+1]
+            ) # Fill in the blanks from the previous recursion call
+
 
     #do the 3-point integral
     i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
