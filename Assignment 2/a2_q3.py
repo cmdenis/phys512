@@ -50,7 +50,7 @@ def mylog2(x):
     return cheb_log2(mantissa) + expo
 
 
-# Check if log works
+# Check if log2 works
 x = np.linspace(0.001, 10, 1001)
 y1 = mylog2(x)
 y2 = np.log2(x)
@@ -68,3 +68,27 @@ plt.plot(x, y2 - y2, label = "np.log2")
 plt.legend()
 plt.savefig("figs/a2q3_partb_residuals.jpg")
 plt.show()
+
+
+def mylog(x):
+    return mylog2(x)/mylog2(np.exp(1))
+
+# Check if log works
+x = np.linspace(0.001, 10, 1001)
+y1 = mylog(x)
+y2 = np.log(x)
+
+plt.clf()
+plt.plot(x, y1, label = "mylog")
+plt.plot(x, y2, label = "np.log")
+plt.legend()
+plt.savefig("figs/a2q3_partb2.jpg")
+plt.show()
+
+plt.clf()
+plt.plot(x, y1 - y2, label = "mylog")
+plt.plot(x, y2 - y2, label = "np.log")
+plt.legend()
+plt.savefig("figs/a2q3_partb_residuals2.jpg")
+plt.show()
+

@@ -136,5 +136,10 @@ If we want to take the natural log of a function, then it's pretty straighforwar
 
 ```python
 def mylog(x):
-    return mylog2(x)/np.exp(1)
+    return mylog2(x)/mylog(np.exp(1))
 ```
+
+We see that this does indeed work:
+
+![a2q3_partb](figs/a2q3_partb2.jpg)
+![a2q3_partb_residuals](figs/a2q3_partb_residuals2.jpg)
