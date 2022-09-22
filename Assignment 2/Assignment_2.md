@@ -18,6 +18,71 @@ We can plot this function (with a total charge on the ring of 1 $C$, which is ad
 
 We see that as we get further away from the source in the positive axis we get pulled back towards it and similarly for the negative direction. When we are dead at the center of the ring, the symmetry creates a 0 field.
 
+## Question 2
+
+To answer this question, we create the following function using the same method that we coded in class:
+
+```python
+    def integrate_adaptive(fun, a, b, tol, extra = None):
+        print('calling adaptive function from ', a, b)
+        sub_div = 5
+        if extra == None:
+            x = np.linspace(a, b, sub_div)
+            dx = x[1] - x[0]
+            y = fun(x)
+        else:
+            x = np.linspace(a, b, sub_div)
+            dx = x[1] - x[0]
+            y = np.array([extra[0], fun(x[1]), extra[1], fun(x[3]), extra[2]])
+
+        #do the 3-point integral
+        i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
+        i2 = (y[0]+4*y[1]+2*y[2]+4*y[3]+y[4])/3*dx
+        myerr = np.abs(i1-i2)
+        if myerr < tol:
+            return i2
+        else:
+            mid = (a+b)/2
+            int1 = integrate_adaptive(fun, a, mid, tol/2, extra = [y[0], y[1], y[2]])
+            int2 = integrate_adaptive(fun, mid, b, tol/2, extra = [y[2], y[3], y[4]])
+            return int1+int2
+
+```
+
+It works like this: in the very first function call, the `extra` argument is `None`, hence it simply creates a vector array, evaluates the step size of this array and creates an array for the image of the inputted function. Once this is done we calculate the integral using two different integrating methods: Simpson's rule and _______. If the two methods yield results which differ by less than the input tolerance, we conclude that the integral is accurate enough, so we output the higher order integration result. However, if the difference is greater than the tolerance, we then separate our interval in two interval of same size. For each of these intervals we then repeat the same protocol as before.
+
+This time, there is one difference: we already know the value of some of our points, from the previous division, namely the starting, middle value and ending point. This means that when we generate our `y` array, we use those values instead of recalculating them. To do this, we pass them in the `extra` argument, which is now not `None` anymore. As can be seen in the code snippet, they are put in an array along with only two other newly generated `y` values.
+
+**How many function calls are we saving?** Well, with the regular method, at each new recusion step we'd be making 10 function calls (5 for each intervals). With this new method, we'd be calling it only 4 times (2 for each intervals). So assuming the number of recursion is relatively large, hence allowing us to neglect the initial 5 calls which are the same for both integrating functions, then we'd have 60% less calls.
+
+So far this has been only for 5 subdivision of our interval. In principle, this principle could be generalized to higher numbbers of division. The procedure to do this is not too complicate but requires a bit of planning regarding the way we replace values in our arrays. Here is one way of doing it in the else statement of the above function (`integrate_adaptive`)
+
+```python
+    new_int = b - a # Size of interval
+
+    dx = new_int/(nb_sub-1) # Step size
+
+    x = np.linspace(a, b, sub_div) # Get regular linspace
+
+    y = fun(
+        np.linspace(
+            a + dx, 
+            b - dx, 
+            int((nb_sub - 1)/2)
+            )
+        ) # Evaluate the function only at the points we have not evaluated yet
+
+    y = np.insert(
+        second_array, 
+        np.arange(int((nb_sub+1)/2)).astype(int), 
+        first_array[:int((nb_sub - 1)/2)+1]
+        ) # Fill in the blanks from the previous recursion call
+```
+
+A  problem with this method is that, although this works for creating the x and y array with an arbitrary large (odd) number of subdivion, the rest of the integrator will also have to be changed. It was built for 5 points, but should we want to use more than 5, the actual Simpson's rule will have to be adjusted.
+
+If we managed to make such a function, following the same reasoning as before the number of calls we'd be saving is $n-1$ per recursion, which is pretty good. However, since we do require a lot of calls to functions like `insert` and two `linspace`s the method described above might not be more beneficial than calling the function 2 times more often. Perhaps there's a more clever way to do the above.
+
 ## Question 3
 
 ### Part a)
