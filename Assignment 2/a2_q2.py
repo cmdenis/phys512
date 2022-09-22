@@ -48,54 +48,12 @@ def integrate_adaptive(fun, a, b, tol, extra = None):
         return int1+int2
 
 
-def integrate_adaptive(fun, a, b, tol, extra = None, sub_div = 5):
-    print('calling adaptive function from ', a, b)
-    if extra == None:
-        x = np.linspace(a, b, sub_div)
-        dx = x[1] - x[0]
-        y = fun(x)
-    else:
-
-        new_int = b - a # Size of interval
-
-        dx = new_int/(nb_sub-1) # Step size
-
-        x = np.linspace(a, b, sub_div) # Get regular linspace
-
-        y = fun(
-            np.linspace(
-                a + dx, 
-                b - dx, 
-                int((nb_sub - 1)/2)
-                )
-            ) # Evaluate the function only at the points we have not evaluated yet
-
-        y = np.insert(
-            second_array, 
-            np.arange(int((nb_sub+1)/2)).astype(int), 
-            first_array[:int((nb_sub - 1)/2)+1]
-            ) # Fill in the blanks from the previous recursion call
-
-
-    #do the 3-point integral
-    i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
-    i2 = (y[0]+4*y[1]+2*y[2]+4*y[3]+y[4])/3*dx
-    myerr = np.abs(i1-i2)
-    if myerr < tol:
-        return i2
-    else:
-        mid = (a+b)/2
-        int1 = integrate_adaptive(fun, a, mid, tol/2, extra = [y[0], y[1], y[2]])
-        int2 = integrate_adaptive(fun, mid, b, tol/2, extra = [y[2], y[3], y[4]])
-        return int1+int2
-
-# To answer the question, we should basically pass the x vector in the extra argument and then we will only need to compute two of the 5 values of the vector
-
+# Testing integrate
 ans = integrate(offset_gauss, -4, 6, 1e-6)
 ans2 = integrate(offset_gauss, -4, 0, 1e-6) + integrate(offset_gauss, 0, 6,1e-6)
 print('Normal Integrator:', ans, ans2, ans-(10+np.sqrt(2*np.pi)))
 
-
+# Testing integrate_adaptive
 ans = integrate_adaptive(offset_gauss, -4, 6, 1e-6)
 ans2 = integrate_adaptive(offset_gauss, -4, 0, 1e-6) + integrate_adaptive(offset_gauss, 0, 6,1e-6)
 print('Adaptive Integrator:', ans, ans2, ans-(10+np.sqrt(2*np.pi)))
