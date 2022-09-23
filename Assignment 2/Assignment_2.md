@@ -30,9 +30,26 @@ We then coded this function and passed it in both our own integrator and in `sci
 
 The curves given by the two integrators are basically indistinguishable.
 
-The integration was done on the $[0, \pi]$ range for `integrate.quad`, but 
+The integration was done on the $[0, \pi]$ range for `integrate.quad`, but we used $(0, \pi]$ for the `intergrate_adaptive` function. This is because our custom function does not deal with the discontinuity/singularity at $z=1$ well, however `integrate.quad` does not have any problems with it. We used the following functions for this:
 
-We see that as we get further away from the source in the positive axis we get pulled back towards it and similarly for the negative direction. When we are dead at the center of the ring, the symmetry creates a 0 field.
+```python
+def to_int(theta, z):
+    # Function to integrate. Without loss of generality we rescale it by making the coefficient 1.
+    coeff = 1 #2*np.pi*R**2*sigma/(4*np.pi*cons.epsilon_0)
+    return -coeff*(z-R*np.cos(theta))*np.sin(theta)/(R**2 + z**2 - 2*R*z*np.cos(theta))**(3/2)
+
+def efield_quad(z):
+    '''Function that integrates the above function for a given z. Done with quad.'''
+    temp_func = lambda theta : to_int(theta, z) # Anonymous function
+    return integrate.quad(temp_func, 0, np.pi) # Integration
+
+def efield_custom(z):
+    '''Function that integrates the above function for a given z. Done with custom adaptive integrator.'''
+    temp_func = lambda theta : to_int(theta, z) # Anonymous function
+    return integrate_adaptive(temp_func, 0.00001, np.pi, 0.001) # Integration
+```
+
+Notice the 0.00001 starting bound instead of the 0 bound for the adaptive integration.
 
 ## Question 2
 

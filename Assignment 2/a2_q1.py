@@ -43,7 +43,7 @@ def to_int(theta, z):
 
 
 # Plotting the function to integrate
-x = np.linspace(0, np.pi, 100)
+x = np.linspace(0, np.pi, 1001)
 y2 = to_int(x, 1.1)
 y3 = to_int(x, 3)
 y4 = to_int(x, 4)
