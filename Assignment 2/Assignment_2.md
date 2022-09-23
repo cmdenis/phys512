@@ -35,7 +35,7 @@ To answer this question, we create the following function using the same method 
             dx = x[1] - x[0]
             y = np.array([extra[0], fun(x[1]), extra[1], fun(x[3]), extra[2]])
 
-        #do the 3-point integral
+        # Approximate integral
         i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
         i2 = (y[0]+4*y[1]+2*y[2]+4*y[3]+y[4])/3*dx
         myerr = np.abs(i1-i2)
@@ -49,7 +49,7 @@ To answer this question, we create the following function using the same method 
 
 ```
 
-It works like this: in the very first function call, the `extra` argument is `None`, hence it simply creates a vector array, evaluates the step size of this array and creates an array for the image of the inputted function. Once this is done we calculate the integral using two different integrating methods: Simpson's rule and _______. If the two methods yield results which differ by less than the input tolerance, we conclude that the integral is accurate enough, so we output the higher order integration result. However, if the difference is greater than the tolerance, we then separate our interval in two interval of same size. For each of these intervals we then repeat the same protocol as before.
+It works like this: in the very first function call, the `extra` argument is `None`, hence it simply creates a vector array, evaluates the step size of this array and creates an array for the image of the inputted function. Once this is done we calculate the integral using two different integrating methods of different order. If the two methods yield results which differ by less than the input tolerance, we conclude that the integral is accurate enough, so we output the higher order integration result. However, if the difference is greater than the tolerance, we then separate our interval in two interval of same size. For each of these intervals we then repeat the same protocol as before.
 
 This time, there is one difference: we already know the value of some of our points, from the previous division, namely the starting, middle value and ending point. This means that when we generate our `y` array, we use those values instead of recalculating them. To do this, we pass them in the `extra` argument, which is now not `None` anymore. As can be seen in the code snippet, they are put in an array along with only two other newly generated `y` values.
 
