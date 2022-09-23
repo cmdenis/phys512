@@ -88,7 +88,7 @@ This time, there is one difference: we already know the value of some of our poi
 
 **How many function calls are we saving?** Well, with the regular method, at each new recusion step we'd be making 10 function calls (5 for each intervals). With this new method, we'd be calling it only 4 times (2 for each intervals). So assuming the number of recursion is relatively large, hence allowing us to neglect the initial 5 calls which are the same for both integrating functions, then we'd have 60% less calls.
 
-Numerically, this hypothesis was tested with a gaussian, an exponential and a sine function, and the counts for the number of calls for the new integrator was indeed around 40% of the calls for the normal one (hence 60% less).
+Numerically, this hypothesis was tested with a gaussian, an exponential and a sine function, and the counts for the number of calls for the new integrator was indeed around 40% of the calls for the normal one (hence 60% less). `a2_q2.py` can be ran for evidence.
 
 So far this has been only for 5 subdivision of our interval. In principle, this principle could be generalized to higher numbbers of division. The procedure to do this is not too complicate but requires a bit of planning regarding the way we replace values in our arrays. Here is one way of doing it in the else statement of the above function (`integrate_adaptive`):s
 
