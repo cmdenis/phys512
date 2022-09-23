@@ -6,12 +6,16 @@ import scipy as sci
 def offset_gauss(x):
     return 1+10*np.exp(-0.5*x**2/(0.1)**2)
 
+
+call_count_norm = 0
 def integrate(fun,a,b,tol):
-    print('calling function from ', a, b)
+    global call_count_norm 
+    call_count_norm += 5
+
     x = np.linspace(a, b, 5)
     dx = x[1] - x[0]
     y = fun(x)
-    #do the 3-point integral
+    # 3-points integral
     i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
     i2 = (y[0]+4*y[1]+2*y[2]+4*y[3]+y[4])/3*dx
     myerr = np.abs(i1-i2)
@@ -23,19 +27,27 @@ def integrate(fun,a,b,tol):
         int2=integrate(fun,mid,b,tol/2)
         return int1+int2
 
-def integrate_adaptive(fun, a, b, tol, extra = None):
-    print('calling adaptive function from ', a, b)
+
+call_count_adapt = 0
+
+def integrate_adaptive(fun, a, b, tol, extra = None, call_count = 0):
+    
+    global call_count_adapt
+
     sub_div = 5
     if extra == None:
+        print('Starting Adaptive Integrator')
         x = np.linspace(a, b, sub_div)
         dx = x[1] - x[0]
+        call_count_adapt += len(x) # To count the number of 
         y = fun(x)
     else:
         x = np.linspace(a, b, sub_div)
         dx = x[1] - x[0]
+        call_count_adapt += 2
         y = np.array([extra[0], fun(x[1]), extra[1], fun(x[3]), extra[2]])
 
-    #do the 3-point integral
+    # 3-points integral
     i1 = (y[0]+4*y[2]+y[4])/3*(2*dx)
     i2 = (y[0]+4*y[1]+2*y[2]+4*y[3]+y[4])/3*dx
     myerr = np.abs(i1-i2)
@@ -48,12 +60,47 @@ def integrate_adaptive(fun, a, b, tol, extra = None):
         return int1+int2
 
 
+# Gaussian test
 # Testing integrate
-ans = integrate(offset_gauss, -4, 6, 1e-6)
-ans2 = integrate(offset_gauss, -4, 0, 1e-6) + integrate(offset_gauss, 0, 6,1e-6)
-print('Normal Integrator:', ans, ans2, ans-(10+np.sqrt(2*np.pi)))
+print("Starting Normal Integrator:")
+ans = integrate(offset_gauss, -5, 5, 1e-7)
+print("Counts are:", call_count_norm)
+print('Normal Integrator:', ans, ans-(10+np.sqrt(2*np.pi)))
 
 # Testing integrate_adaptive
-ans = integrate_adaptive(offset_gauss, -4, 6, 1e-6)
-ans2 = integrate_adaptive(offset_gauss, -4, 0, 1e-6) + integrate_adaptive(offset_gauss, 0, 6,1e-6)
-print('Adaptive Integrator:', ans, ans2, ans-(10+np.sqrt(2*np.pi)))
+ans = integrate_adaptive(offset_gauss, -5, 5, 1e-7)
+print("Counts are:", call_count_adapt)
+print('Adaptive Integrator:', ans, ans-(10+np.sqrt(2*np.pi)))
+
+print("The ratio of counts is:", call_count_adapt/call_count_norm)
+
+
+# Exponential test
+# Testing integrate
+print("Starting Normal Integrator:")
+ans = integrate(np.exp, 0, 2, 1e-7)
+print("Counts are:", call_count_norm)
+print('Normal Integrator:', ans, ans-(np.exp(2)-np.exp(0)))
+
+# Testing integrate_adaptive
+ans = integrate_adaptive(np.exp, 0, 2, 1e-7)
+print("Counts are:", call_count_adapt)
+print('Adaptive Integrator:', ans, ans-(np.exp(2)-np.exp(0)))
+
+print("The ratio of counts is:", call_count_adapt/call_count_norm)
+
+
+# Sine test
+# Testing integrate
+print("Starting Normal Integrator:")
+ans = integrate(np.sin, -5, 5, 1e-7)
+print("Counts are:", call_count_norm)
+print('Normal Integrator:', ans, ans-(np.cos(5)-np.cos(-5)))
+
+# Testing integrate_adaptive
+ans = integrate_adaptive(np.sin, -5, 5, 1e-7)
+print("Counts are:", call_count_adapt)
+print('Adaptive Integrator:', ans, ans-(np.cos(5)-np.cos(-5)))
+
+print("The ratio of counts is:", call_count_adapt/call_count_norm)
+
