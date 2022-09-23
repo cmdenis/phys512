@@ -1,4 +1,3 @@
-from ast import arg
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sci
@@ -33,6 +32,7 @@ def integrate_adaptive(fun, a, b, tol, extra = None):
 
 
 
+
 R = 1 # Radius of sphere
 sigma = 0.1*(4 * np.pi * R**2)**-1 # Surface charge density (total is 1 C)
 
@@ -48,12 +48,19 @@ y2 = to_int(x, 1.1)
 y3 = to_int(x, 3)
 y4 = to_int(x, 4)
 
-plt.plot(x, y2)
-plt.plot(x, y3)
-plt.plot(x, y4)
-#plt.show()
+plt.plot(x, y2, label = "z = 1.1")
+plt.plot(x, y3, label = "z = 3")
+plt.plot(x, y4, label = "z = 4")
+plt.xlabel("Distance from center of sphere")
+plt.legend()
+plt.title("Function to integrate")
+plt.savefig("figs/a2q1_func_int.jpg")
+plt.show()
 plt.clf()
 
+
+
+# Defining the electric field functions (with the built in integration)
 
 def efield_quad(z):
     '''Function that integrates the above function for a given z. Done with quad.'''
@@ -68,17 +75,20 @@ def efield_custom(z):
 
 
 
+# Plotting the electric field with the two integrators
 
-
-v = np.linspace(0, 4, 1001)
-y_data_quad = [efield_quad(i)[0] for i in v]
-y_data_custom = [efield_custom(i) for i in v]
+v = np.linspace(0, 4, 1001) # Linspace
+y_data_quad = [efield_quad(i)[0] for i in v]  # y data for quad
+y_data_custom = [efield_custom(i) for i in v] # y data for custom integrator
 #y_coul = 0.1/(4*np.pi*cons.epsilon_0*v**2)
 
 plt.clf()
 plt.plot(v, y_data_quad, label = "integrate.quad")
 plt.plot(v, y_data_custom, label = "integrate_adaptive")
 plt.legend()
+plt.ylabel("Electric Field")
+plt.xlabel("Distance from center of sphere")
+plt.title("Electric Field as function of the distance from the ball")
 plt.savefig("figs/a2q1_efield_ball.jpg")
 plt.show()
 

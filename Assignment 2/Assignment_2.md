@@ -10,11 +10,27 @@ We first look at the electric field of a uniformily charged ring. We kow that, a
 
 $$E_c = -\frac{Q z}{4\pi \epsilon_0(z^2 + R^2)^{3/2}} $$
 
-(found on [Hyperphysics](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/elelin.html)).
+(found on [Hyperphysics](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/elelin.html)). If we integrate this function at all angles from the center of the sphere (which is made of infinitelly thin rings) we can obtain the resulting function for the total electric field of the sphere. The integral we must consider, based on Problem 2.8 in Griffith's Introduction to electrodynamics is :
 
-We can plot this function (with a total charge on the ring of 1 $C$, which is admidetly pretty large, and let's assume a radius of 1 $m$ for simplicity):
+$$E_z(z) = \frac{ R^2 \sigma}{2 \epsilon_0} \int_0^\pi \frac{(z - R \cos \theta) \sin \theta}{\left(R^2 + z^2 - 2Rz \cos \theta \right)^{3/2}} d\theta$$
 
-![q1_ring_ef](figs/q1_ring_ef.jpg)
+The function inside the integral is
+
+$$\frac{ R^2 \sigma}{2 \epsilon_0} \frac{(z - R \cos \theta) \sin \theta}{\left(R^2 + z^2 - 2Rz \cos \theta \right)^{3/2}}$$
+
+This function looks like the following:
+
+![a2q1_func_int](figs/a2q1_func_int.jpg)
+
+As we approach the shell, at $z=1$ (the radius of the shell) we have a discontinuity at 0. 
+
+We then coded this function and passed it in both our own integrator and in `scipy`'s `integrate.quad`. The results are as follows (scanning through different $z$ values):
+
+![a2q1_efield_ball](figs/a2q1_efield_ball.jpg)
+
+The curves given by the two integrators are basically indistinguishable.
+
+The integration was done on the $[0, \pi]$ range for `integrate.quad`, but 
 
 We see that as we get further away from the source in the positive axis we get pulled back towards it and similarly for the negative direction. When we are dead at the center of the ring, the symmetry creates a 0 field.
 
