@@ -83,3 +83,15 @@ y_0 = -\frac{C}{2 A} \\
 z_0 = -\frac{B^2 + C^2 - 4 AD}{4 A}
 \end{cases}
 $$
+
+### Part b)
+
+If we look at our data we see a seemingly paraboloid shape:
+
+![a3q3_paraboloid_data](figs/a3q3_rawdata.jpg)
+
+We carried out a fit for the data using the linearized parameters version of the paraboloid model. The code works as follow. We essentially create an array with all the pairs corresponding to the x and y coordinates of our points. This will allow us to create the ''$A$'' matrix in our code that contains along the row, the different "functions" from which is made our model. Since the model is linear, with respect to its components, each "function" acts somewhat like a vector in the space of all possible functions and our parameters are simply the weights for all the vectors. We thus create the matrix A which columns corresponds to each of these "functions" and along each column is the function evaluated at all the pair of data in x and y. 
+
+From this matrix we can use the same method that we used in class to minimize the $\Chi^2$ value of the fit by working it out only with linear algebra. The following figure shows the surface plot (blue) of a paraboloid with our best-fit parameters. In red is our original data points. The overall shape appears to be respected.
+
+![a3q3_paraboloid_data](figs/a3q3_paraboloid_data.jpg)
