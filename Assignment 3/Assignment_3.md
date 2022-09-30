@@ -73,7 +73,7 @@ Since the half-life of U238 is quite long, $\approx 4\ \text{billion years}$, we
 
 ![a3q2_decay_ratio_plot](figs/a3q2_decay_ratio_plot.jpg)
 
-We can analytically estimate how this curve should look like. Assuming that the transition from U238 to Pb206 is mainly determined by the half-life of U238 to the next element (which is legitimate since it is a lot bigger in magnitude than the other half-lives), we can write up:
+We can analytically estimate what this curve should be. Assuming that the transition from U238 to Pb206 is mainly determined by the half-life of U238 to the next element (which is legitimate since it is a lot bigger in magnitude than the other half-lives), we can write up:
 
 $$
 \begin{cases}
@@ -95,7 +95,17 @@ Consequently the ratio of the two compounds as a function of time is simply
 
 $$ R(t) = e^{t/C_{\text{U238}}} - 1$$
 
+We now plot the ratios obtained numerically and analytically:
+
 ![a3q2_decay_ratio_plot](figs/a3q2_analytic_comp.jpg)
+
+We see that the numerical one is lower than the anylitic one iniitially. This makes sense since the decays haven't "had the time to reach" the Pb206. It does match the curve much better later on.
+
+We can now also plot the ratio of Th230 to U234:
+
+![a3q2_decay_ratio_plot](figs/a3q2_decay_ratio_plot2.jpg)
+
+We see that the ratio approaches an equilibrium point.
 
 ## Question 3
 
@@ -170,3 +180,31 @@ But these are the transformed parameters to make the model linear. In the old co
     y_0 = 5.82214761e+01 
     z_0 = -1.51287721e+03
 ```
+
+### Part c)
+
+To estimate the noise let's look at the impact that the standard deviation has on `a`, if this deviation happens at the edge of the parabola. In other words, we want to find $\Delta a$ for which:
+
+$$ (a + \Delta a)x_0^2 = x_0 + \Delta x$$
+
+We get
+
+$$ \Delta a = \frac{x_0 + \Delta x}{x_0^2}-a$$
+
+Numerically, this is: 0.0001.
+
+We can propagate this using a truncated taylor series (or derivative):
+
+$$\sigma_f = \frac{df}{da}\sigma_a$$
+
+and since we know that
+
+$$ f(a) = \frac{4}{a}$$
+
+We have
+
+$$\sigma_f = \frac{4}{a}\sigma_a$$
+
+$$f = 1499.659984125219 \pm 20000$$
+
+This does not make sense... Way too big errors. However, the focal length is really close to the expect value by less than 1 mm.

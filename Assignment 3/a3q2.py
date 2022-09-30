@@ -2,6 +2,10 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
+
+# PART 1) Simulate the decay of U238
+
+# Setting up our ode
 def fun(x, y, half_life = [1, 0.1]):
     # This is for decay of U238
     dydx = np.zeros(len(half_life) + 1)
@@ -10,6 +14,8 @@ def fun(x, y, half_life = [1, 0.1]):
     dydx[2] = y[1]/half_life[1]
     return dydx
 
+
+# units for conversion to seconds
 hours = 3.6e3
 bil_years = 3.15e19
 day = 8.64e4
@@ -56,12 +62,15 @@ def fun(
         138376 * day        # Po210
     ]
     ):
+
+
     # This is for decay of U238
 
-    half_life = np.array(half_life)/year
+    half_life = np.array(half_life)/year # In the end I ended up switching to years
     dydx = np.zeros(len(half_life) + 1) # Initializing the array for the derivatives
 
-    dydx[0] = -y[0]/half_life[0]        # Setting up the first one
+
+    dydx[0] = -y[0]/half_life[0]        # Setting up the first transition
 
     for i in range(1, len(dydx) - 1):   # Going through a loop to create the vector
         dydx[i] = y[i-1]/half_life[i-1] - y[i]/half_life[i]
@@ -70,15 +79,18 @@ def fun(
 
     return dydx
 
+
+
+# Init simulation
 y0 = np.insert(np.zeros(len(comp_name)-1), 0, 1)
 x0 = 0
-x1 = 1e20
+x1 = 1e12
 
-ans_rk4 = integrate.solve_ivp(fun, [x0, x1], y0, method = 'Radau')
+sol = integrate.solve_ivp(fun, [x0, x1], y0, method = 'Radau')
 
 
-for y_dat, name in zip(ans_rk4.y, comp_name):
-    plt.loglog(ans_rk4.t, y_dat, label = name)
+for y_dat, name in zip(sol.y, comp_name):
+    plt.loglog(sol.t, y_dat, label = name)
     
 plt.title("U238 Radioactive decay")
 plt.legend(prop={'size': 8})
@@ -88,7 +100,11 @@ plt.savefig("figs/a3q2_decay_plot.jpg")
 plt.show()
 
 
-plt.loglog(ans_rk4.t, ans_rk4.y[-1]/ans_rk4.y[0], label = "Ratio of Pb206/U238")
+
+
+# PART 2) Plotting the ratio of two elements
+
+plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Ratio of Pb206/U238")
 
 plt.title("Pb206/U238 ratio")
 plt.legend()
@@ -98,7 +114,7 @@ plt.savefig("figs/a3q2_decay_ratio_plot.jpg")
 plt.show()
 
 
-# Defining the analytic estimation for the ratio of the two elements
+# Defining the analytic estimation for the ratio of U238 and Pb206
 def rat_Pb_U(t):
     U_hl = 4.468*bil_years/year
     return np.exp(t/U_hl) - 1
@@ -106,7 +122,7 @@ def rat_Pb_U(t):
 v = np.linspace(x0, x1, 1000)
 ana_y = rat_Pb_U(v)
 
-plt.loglog(ans_rk4.t, ans_rk4.y[-1]/ans_rk4.y[0], label = "Numerical")
+plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Numerical")
 plt.loglog(v, ana_y, label = "Analytic")
 
 plt.title("Pb206/U238 ratio")
@@ -115,3 +131,35 @@ plt.xlabel("Time")
 plt.ylabel("Concentration")
 plt.savefig("figs/a3q2_analytic_comp.jpg")
 plt.show()
+
+
+# PART 3) Plotting the ratio of U238 and Th230
+
+plt.loglog(sol.t, sol.y[4]/sol.y[3], label = "Ratio of Th230/U238")
+
+plt.title("Th230/U238 ratio")
+plt.legend()
+plt.xlabel("Time")
+plt.ylabel("Concentration")
+plt.savefig("figs/a3q2_decay_ratio_plot2.jpg")
+plt.show()
+
+'''
+# Defining the analytic estimation for the ratio of the two elements
+def rat_Pb_U(t):
+    U_hl = 4.468*bil_years/year
+    return np.exp(t/U_hl) - 1
+
+v = np.linspace(x0, x1, 1000)
+ana_y = rat_Pb_U(v)
+
+plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Numerical")
+plt.loglog(v, ana_y, label = "Analytic")
+
+plt.title("Pb206/U238 ratio")
+plt.legend()
+plt.xlabel("Time")
+plt.ylabel("Concentration")
+plt.savefig("figs/a3q2_analytic_comp.jpg")
+plt.show()
+'''

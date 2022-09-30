@@ -16,7 +16,7 @@ ax.scatter(dat[0], dat[1], dat[2])
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_zlabel('Z-axis')
-#plt.show()
+plt.show()
 
 # Our x, y, z data
 xs = dat[0]
@@ -82,7 +82,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
 plt.savefig('figs/a3q3_paraboloid_data.jpg')
-#plt.show()
+plt.show()
 
 print("Our best fit parameters are:", fitp)
 
@@ -105,6 +105,12 @@ original_fit = coord_trans(fitp)
 
 noise  = np.std(np.array([paraboloid(j[0], j[1], fitp) for j in xy_vec]) - zs)
 
-print("The noise is:", noise)
+noise2  = np.std(np.array([paraboloid(j[0], j[1], fitp) for j in xy_vec]) - zs)
 
-print("focal length is:", 1/original_fit[0]/4)
+print("The noise is:", noise)
+print("New noise is:", noise2)
+
+a_err = (3500 + noise)/3500**2 - original_fit[0]
+print("The estimated error on a is", a_err)
+
+print("focal length is:", 1/original_fit[0]/4, '\pm', 4/original_fit[0]**2*a_err)
