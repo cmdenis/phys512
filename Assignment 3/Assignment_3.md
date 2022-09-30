@@ -6,13 +6,68 @@ For PHYS-512
 
 ## Question 1
 
-Look at eq 17.2.1 without knowing exactly what the coefficient $\phi$ is, you can still cancel that term by putting the equations todgether.
+
+### Part 1
+
+The RK4 integrator was coded as follow:
+
+```python
+def rk4_step(fun, x, y, h):
+    '''Runge-Kutta 4 step integrator'''
+    k1 = h*fun(x, y)
+    k2 = h*fun(x+h/2, y+k1/2)
+    k3 = h*fun(x+h/2, y+k2/2)
+    k4 = h*fun(x+h, y+k3)
+    return y + (k1 +2*k2 + 2*k3 +k4)/6
+
+```
+
+It calculates the appropriate $k_n$ coefficients and then puts them together according to the RK4 method. We can see it in action in the following plot with the residuals.
+
+![a3q1_decay_plot](figs/a3q1_pt1_comp.jpg)
+
+![a3q1_decay_plot](figs/a3q1_pt1_resi.jpg)
+
+We can see that the error is of magnitude $10^{-4}$. Overall the method does decently well at following the general cuve.
+
+### Part 2)
+
+Disclaimer: this method is heavily based on section 17.2 from Numerical Recipes.
+
+We start by considering the result of a RK4 step. Since it is order 4 it means that the leading error on our result for a single step will be of the form
+
+$$ \text{error}_h = h^5 \phi $$
+
+where $\phi$ is simply a constant related to the derivative of our function. If we take two successive steps of half length, we end up with a different result:
+
+$$ \text{error}_\frac{h}{2} = 2\frac{ h^5}{2^5} \phi =  \frac{ h^5}{16} \phi $$
+
+We can then substract the two methods from each other with the right coefficient to get down to order 6 error. Let's label $r_1(x, y)$ as a single step integrator with size $h$ and $r_2(x, y)$ as a single step with size $\frac{h}{2}$. To cancel the 5th order error and preserve the magnitude of the answer we must write:
+
+$$ \frac{16r_2(x, y) - r_1(x,y) }{15} = y(x+h) + O(6)$$
+
+We can then code this using the previous RK4 function.
+
+```python
+def rk4_stepd(fun, x, y, h):
+    first_step = rk4_step(fun, x, y, h/2)
+    second_step = rk4_step(fun, x + h/2, first_step, h/2)
+    return (16*second_step - rk4_step(fun, x, y, h) )/15
+```
+
+We essentially apply the `rk4_stepd` function twice using half the step size and then use it with the original method. We can see it do a lot better than the previous method:
+
+![a3q1_decay_plot](figs/a3q1_pt2_comp.jpg)
+
+![a3q1_decay_plot](figs/a3q1_pt2_resi.jpg)
+
+The error is 3 orders of magnitude smaller than our original RK4 function. However in terms of computational cost, the one that we wrote, just now, evaluates three times the original function. However, we could modify it and reuse some of the function calls that were already used in `rk4_stepd`. Mainly, the first function call (at $x$ and $y$, where both method start). Hence we actually call the function $12-1 = 11$ times instead of only $4$. According to Numerical Recipes, this is not a fair comparison since our new function is now of order 5, which means it should be compared to 8 function calls as opposed to 4. 
 
 ## Question 2
 
-Using `scipy`'s `integrate.solve_ivp` we carried out an integration of the chain of decay of U238 to Pb206. We started the simulation with a pure concentration of U238 (so nothing for the concentrations of any other elements). The integration was carried out using the Radau implicit integration method.
+Using `scipy`'s `integrate.solve_ivp` we carried out an integration of the chain of decay of U238 to Pb206. We started the simulation with a pure concentration of U238 (so nothing for the concentrations of any other elements). The integration was carried out using the Radau implicit integration method. The RK4 method was briefly tested, but the running time was simply way too long.
 
-Since the half-life of U238 is quite long, $\approx 4 \text{billion years}$, we must look at a range of a similar magnitude to observe relevant transitions:
+Since the half-life of U238 is quite long, $\approx 4\ \text{billion years}$, we must look at a range of a similar magnitude to observe relevant transitions:
 
 ![a3q2_decay_plot](figs/a3q2_decay_plot.jpg)
 
