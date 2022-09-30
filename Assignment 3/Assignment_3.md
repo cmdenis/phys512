@@ -6,7 +6,6 @@ For PHYS-512
 
 ## Question 1
 
-
 ### Part 1
 
 The RK4 integrator was coded as follow:
@@ -61,7 +60,7 @@ We essentially apply the `rk4_stepd` function twice using half the step size and
 
 ![a3q1_decay_plot](figs/a3q1_pt2_resi.jpg)
 
-The error is 3 orders of magnitude smaller than our original RK4 function. However in terms of computational cost, the one that we wrote, just now, evaluates three times the original function. However, we could modify it and reuse some of the function calls that were already used in `rk4_stepd`. Mainly, the first function call (at $x$ and $y$, where both method start). Hence we actually call the function $12-1 = 11$ times instead of only $4$. According to Numerical Recipes, this is not a fair comparison since our new function is now of order 5, which means it should be compared to 8 function calls as opposed to 4. 
+The error is 3 orders of magnitude smaller than our original RK4 function. However in terms of computational cost, the one that we wrote, just now, evaluates three times the original function. However, we could modify it and reuse some of the function calls that were already used in `rk4_stepd`. Mainly, the first function call (at $x$ and $y$, where both method start). Hence we actually call the function $12-1 = 11$ times instead of only $4$. According to Numerical Recipes, this is not a fair comparison since our new function is now of order 5, which means it should be compared to 8 function calls as opposed to 4.
 
 ## Question 2
 
@@ -157,7 +156,7 @@ If we look at our data we see a seemingly paraboloid shape:
 
 ![a3q3_paraboloid_data](figs/a3q3_rawdata.jpg)
 
-We carried out a fit for the data using the linearized parameters version of the paraboloid model. The code works as follow. We essentially create an array with all the pairs corresponding to the x and y coordinates of our points. This will allow us to create the ''$A$'' matrix in our code that contains along the row, the different "functions" from which is made our model. Since the model is linear, with respect to its components, each "function" acts somewhat like a vector in the space of all possible functions and our parameters are simply the weights for all the vectors. We thus create the matrix A which columns corresponds to each of these "functions" and along each column is the function evaluated at all the pair of data in x and y. 
+We carried out a fit for the data using the linearized parameters version of the paraboloid model. The code works as follow. We essentially create an array with all the pairs corresponding to the x and y coordinates of our points. This will allow us to create the ''$A$'' matrix in our code that contains along the row, the different "functions" from which is made our model. Since the model is linear, with respect to its components, each "function" acts somewhat like a vector in the space of all possible functions and our parameters are simply the weights for all the vectors. We thus create the matrix A which columns corresponds to each of these "functions" and along each column is the function evaluated at all the pair of data in x and y.
 
 From this matrix we can use the same method that we used in class to minimize the $\Chi^2$ value of the fit by working it out only with linear algebra. The following figure shows the surface plot (blue) of a paraboloid with our best-fit parameters. In red is our original data points. The overall shape appears to be respected.
 
@@ -183,17 +182,11 @@ But these are the transformed parameters to make the model linear. In the old co
 
 ### Part c)
 
-To estimate the noise let's look at the impact that the standard deviation has on `a`, if this deviation happens at the edge of the parabola. In other words, we want to find $\Delta a$ for which:
+To estimate the noise we vary $a$ and then look at how the standard deviation on the residuals is affected. Through trial and error (automatization could've been used, but we figured it was not worth it for this assignment) we found the deviation from best fit $a$ that yielded a doubling in the $\sigma$. We assumed that this bounds the error on the parameter. This value was found to be 2.4e-06.
 
-$$ (a + \Delta a)x_0^2 = x_0 + \Delta x$$
+The relationship between the focal length and our parameters is pretty straighforward since by applying a translation to our parabola, we keep the same $a$ parameter. Hence we have the relation: $f(a) = \frac{4}{a}$.
 
-We get
-
-$$ \Delta a = \frac{x_0 + \Delta x}{x_0^2}-a$$
-
-Numerically, this is: 0.0001.
-
-We can propagate this using a truncated taylor series (or derivative):
+We can propagate the error on $a$ using a truncated taylor series (or derivative):
 
 $$\sigma_f = \frac{df}{da}\sigma_a$$
 
@@ -205,6 +198,6 @@ We have
 
 $$\sigma_f = \frac{4}{a}\sigma_a$$
 
-$$f = 1499.659984125219 \pm 20000$$
+$$f = 1500 \pm 300\ \text{mm}$$
 
-This does not make sense... Way too big errors. However, the focal length is really close to the expect value by less than 1 mm.
+This error is likely to be generous. Our calculated focal length, after rounding, falls exactly within the error bound of the expected value! Pretty cool.
