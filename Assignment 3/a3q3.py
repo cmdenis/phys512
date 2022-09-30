@@ -16,16 +16,16 @@ ax.scatter(dat[0], dat[1], dat[2])
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_zlabel('Z-axis')
-plt.show()
+#plt.show()
 
 # Our x, y, z data
 xs = dat[0]
 ys = dat[1]
-zs = dat[2]
+zs = dat[2] 
+
+
 
 xy_vec = np.array([xs, ys]).T
-
-
 
 # Defining an array with our 4 different functions so we can iterate through them when making matrix A
 funcs = np.array(
@@ -37,9 +37,6 @@ funcs = np.array(
     ]
 )
 
-#print(np.array([funcs[1](j) for j in xy_vec]))
-
-#assert(0==1)
 
 
 A = np.zeros([len(xs), len(funcs)])
@@ -51,12 +48,10 @@ for i in range(len(funcs)):
 
 
 
-#print(np.shape(A.T))
-
 lhs = A.T@A
 rhs = A.T@zs
 fitp = np.linalg.inv(lhs)@rhs
-#pred = A@fitp
+
 
 
 def paraboloid(x, y, fit):
@@ -71,8 +66,8 @@ ax = fig.add_subplot(111, projection='3d')
 x = np.linspace(min(xs), max(xs), 100)
 y = np.linspace(min(ys), max(ys), 100)
 X, Y = np.meshgrid(x, y)
-zs = np.array(paraboloid(np.ravel(X), np.ravel(Y), fitp))
-Z = zs.reshape(X.shape)
+zshape = np.array(paraboloid(np.ravel(X), np.ravel(Y), fitp))
+Z = zshape.reshape(X.shape)
 
 ax.plot_surface(X, Y, Z)
 
@@ -86,7 +81,30 @@ ax.scatter(
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
-ax.legend()
 plt.savefig('figs/a3q3_paraboloid_data.jpg')
-plt.show()
+#plt.show()
 
+print("Our best fit parameters are:", fitp)
+
+def coord_trans(x):
+    A, B, C, D = x
+    return np.array([
+        A,
+        -B/(2*A),
+        -C/(2*A),
+        -(B**2 + C**2 - 4*A*D)/(4*A)
+    ])
+
+print("Our best fit parameters (in the original coordinate system) are:", coord_trans(fitp))
+
+
+
+# Now we find the error in the data
+
+original_fit = coord_trans(fitp)
+
+noise  = np.std(np.array([paraboloid(j[0], j[1], fitp) for j in xy_vec]) - zs)
+
+print("The noise is:", noise)
+
+print("focal length is:", 1/original_fit[0]/4)

@@ -6,6 +6,8 @@ For PHYS-512
 
 ## Question 1
 
+Look at eq 17.2.1 without knowing exactly what the coefficient $\phi$ is, you can still cancel that term by putting the equations todgether.
+
 ## Question 2
 
 Using `scipy`'s `integrate.solve_ivp` we carried out an integration of the chain of decay of U238 to Pb206. We started the simulation with a pure concentration of U238 (so nothing for the concentrations of any other elements). The integration was carried out using the Radau implicit integration method.
@@ -95,3 +97,21 @@ We carried out a fit for the data using the linearized parameters version of the
 From this matrix we can use the same method that we used in class to minimize the $\Chi^2$ value of the fit by working it out only with linear algebra. The following figure shows the surface plot (blue) of a paraboloid with our best-fit parameters. In red is our original data points. The overall shape appears to be respected.
 
 ![a3q3_paraboloid_data](figs/a3q3_paraboloid_data.jpg)
+
+Our best fit parameters are
+
+```python
+    A = 1.66704455e-04  
+    B = 4.53599028e-04
+    C = -1.94115589e-02
+    D = -1.51231182e+0
+```
+
+But these are the transformed parameters to make the model linear. In the old coordinate system we have:
+
+```python
+    a = 1.66704455e-04 
+    z_0 = -1.36048862e+00  
+    y_0 = 5.82214761e+01 
+    z_0 = -1.51287721e+03
+```
