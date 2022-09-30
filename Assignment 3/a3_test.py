@@ -1,6 +1,12 @@
 import numpy as np
 
-array = np
+v1 = [0.1, 2, 3,4 ,5 ]
+v2 = [1, 2, 3,4 ,5 ]
 
-for i in range(0, 3):
-    print(i) 
+a = []
+
+a.append(v1)
+
+a.append(v2)
+
+print(a)

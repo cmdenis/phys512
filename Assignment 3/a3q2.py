@@ -71,7 +71,7 @@ def fun(
     return dydx
 
 y0 = np.insert(np.zeros(len(comp_name)-1), 0, 1)
-x0 = 1
+x0 = 0
 x1 = 1e20
 
 ans_rk4 = integrate.solve_ivp(fun, [x0, x1], y0, method = 'Radau')
