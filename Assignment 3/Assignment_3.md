@@ -41,7 +41,7 @@ where $\phi$ is simply a constant related to the derivative of our function. If 
 
 $$ \text{error}_\frac{h}{2} = 2\frac{ h^5}{2^5} \phi =  \frac{ h^5}{16} \phi $$
 
-We can then substract the two methods from each other with the right coefficient to get down to order 6 error. Let's label $r_1(x, y)$ as a single step integrator with size $h$ and $r_2(x, y)$ as a single step with size $\frac{h}{2}$. To cancel the 5th order error and preserve the magnitude of the answer we must write:
+We can then substract the two methods from each other with the right coefficient to get down to order 6 error. Let's label $r_1(x, y)$ as a single step integrator with size $h$ and $r_2(x, y)$ as two steps each with size $\frac{h}{2}$. To cancel the 5th order error and preserve the magnitude of the answer we must write:
 
 $$ \frac{16r_2(x, y) - r_1(x,y) }{15} = y(x+h) + O(6)$$
 
@@ -98,7 +98,7 @@ We now plot the ratios obtained numerically and analytically:
 
 ![a3q2_decay_ratio_plot](figs/a3q2_analytic_comp.jpg)
 
-We see that the numerical one is lower than the anylitic one iniitially. This makes sense since the decays haven't "had the time to reach" the Pb206. It does match the curve much better later on.
+We see that the numerical one is lower than the anylitic one initially. This makes sense since the decays haven't "had the time to reach" the Pb206. It does match the curve much better later on.
 
 We can now also plot the ratio of Th230 to U234:
 
@@ -200,4 +200,6 @@ $$\sigma_f = \frac{4}{a}\sigma_a$$
 
 $$f = 1500 \pm 300\ \text{mm}$$
 
-This error is likely to be generous. Our calculated focal length, after rounding, falls exactly within the error bound of the expected value! Pretty cool.
+This error is likely to be generous. Our calculated focal length, after rounding, falls exactly within the error bound of the expected value.
+
+However, I am pretty sure this method is either incorrect or very inacurate. I believe a more appropriate way of doing this would have been to use the matrix operation we saw in class, involving the diagonal matrix with the error for each data point. I am catching this too late...

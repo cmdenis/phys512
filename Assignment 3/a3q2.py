@@ -23,7 +23,7 @@ year = 3.15e7
 minute = 60
 
 
-
+# Array for elements names
 comp_name = [
     'U238',
     'Th234', 
@@ -89,15 +89,24 @@ x1 = 1e12
 sol = integrate.solve_ivp(fun, [x0, x1], y0, method = 'Radau')
 
 
+
+# Ploting
 for y_dat, name in zip(sol.y, comp_name):
     plt.loglog(sol.t, y_dat, label = name)
     
 plt.title("U238 Radioactive decay")
 plt.legend(prop={'size': 8})
-plt.xlabel("Time")
+plt.xlabel("Time (Years)")
 plt.ylabel("Concentration")
 plt.savefig("figs/a3q2_decay_plot.jpg")
 plt.show()
+
+
+
+
+
+
+
 
 
 
@@ -108,8 +117,8 @@ plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Ratio of Pb206/U238")
 
 plt.title("Pb206/U238 ratio")
 plt.legend()
-plt.xlabel("Time")
-plt.ylabel("Concentration")
+plt.xlabel("Time (Years)")
+plt.ylabel("Concentration Ratio")
 plt.savefig("figs/a3q2_decay_ratio_plot.jpg")
 plt.show()
 
@@ -122,15 +131,26 @@ def rat_Pb_U(t):
 v = np.linspace(x0, x1, 1000)
 ana_y = rat_Pb_U(v)
 
+
+# Plotting
 plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Numerical")
 plt.loglog(v, ana_y, label = "Analytic")
 
 plt.title("Pb206/U238 ratio")
 plt.legend()
-plt.xlabel("Time")
-plt.ylabel("Concentration")
+plt.xlabel("Time (Years)")
+plt.ylabel("Concentration Ratio")
 plt.savefig("figs/a3q2_analytic_comp.jpg")
 plt.show()
+
+
+
+
+
+
+
+
+
 
 
 # PART 3) Plotting the ratio of U238 and Th230
@@ -139,27 +159,7 @@ plt.loglog(sol.t, sol.y[4]/sol.y[3], label = "Ratio of Th230/U238")
 
 plt.title("Th230/U238 ratio")
 plt.legend()
-plt.xlabel("Time")
-plt.ylabel("Concentration")
+plt.xlabel("Time (Years)")
+plt.ylabel("Concentration Ratio")
 plt.savefig("figs/a3q2_decay_ratio_plot2.jpg")
 plt.show()
-
-'''
-# Defining the analytic estimation for the ratio of the two elements
-def rat_Pb_U(t):
-    U_hl = 4.468*bil_years/year
-    return np.exp(t/U_hl) - 1
-
-v = np.linspace(x0, x1, 1000)
-ana_y = rat_Pb_U(v)
-
-plt.loglog(sol.t, sol.y[-1]/sol.y[0], label = "Numerical")
-plt.loglog(v, ana_y, label = "Analytic")
-
-plt.title("Pb206/U238 ratio")
-plt.legend()
-plt.xlabel("Time")
-plt.ylabel("Concentration")
-plt.savefig("figs/a3q2_analytic_comp.jpg")
-plt.show()
-'''
