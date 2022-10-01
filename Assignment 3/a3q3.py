@@ -38,22 +38,21 @@ funcs = np.array(
 )
 
 
-
+# Creating A matrix
 A = np.zeros([len(xs), len(funcs)])
-
 
 for i in range(len(funcs)):
     A[:, i] = np.array([funcs[i](j) for j in xy_vec])
 
 
 
-
+# Linear algebra operations
 lhs = A.T@A
 rhs = A.T@zs
 fitp = np.linalg.inv(lhs)@rhs
 
 
-
+# Defining paraboloid function
 def paraboloid(x, y, fit):
     return fit[0]*(x**2 + y**2) + fit[1]*x + fit[2]*y + fit[3]
 
@@ -61,6 +60,7 @@ def paraboloid(x, y, fit):
 
 
 # Plotting the surface of the paraboloid with the original data
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 x = np.linspace(min(xs), max(xs), 100)
@@ -86,6 +86,8 @@ plt.show()
 
 print("Our best fit parameters are:", fitp)
 
+
+# Coordinate transformation function
 def coord_trans(x):
     A, B, C, D = x
     return np.array([
@@ -101,16 +103,10 @@ print("Our best fit parameters (in the original coordinate system) are:", coord_
 
 # Now we find the error in the data
 
-
 original_fit = coord_trans(fitp)
 
 noise  = np.std(np.array([paraboloid(j[0], j[1], fitp) for j in xy_vec]) - zs)
 
-N_mat = np.zeros((len(xs), len(xs)))
-np.fill_diagonal(N_mat, noise)
-
-
-err_mat = A@np.linalg.inv(A.T@np.linalg.inv(N_mat)@A)@A.T 
 trial_err = 0.0000024
 fitp[0] = fitp[0]+trial_err
 
