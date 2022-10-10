@@ -67,7 +67,7 @@ for j in range(5):
 
 plt.plot(t, lorentz_fit(p, t), label = "Best Fit")
 plt.legend()
-plt.savefig("figs/a4q1a_newton_method.jpg")
+plt.savefig("figs/a4q1c_newton_method.jpg")
 plt.show()
 plt.clf()
     
