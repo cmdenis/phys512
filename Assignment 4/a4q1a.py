@@ -60,6 +60,8 @@ for j in range(5):
 
 plt.plot(t, lorentz_fit(p, t)[0], label = "Best Fit")
 plt.legend()
+plt.xlabel("Time (t)")
+plt.ylabel("Amplitude")
 plt.savefig("figs/a4q1a_newton_method.jpg")
 plt.show()
 plt.clf()
