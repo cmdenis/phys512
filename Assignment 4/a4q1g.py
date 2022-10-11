@@ -69,8 +69,68 @@ plt.ylabel("Amplitude")
 plt.plot(t, three_lorentz_fit(p, t)*0, label = "Best Fit")
 plt.legend()
 plt.savefig("figs/a4q13_residuals.jpg")
-plt.show()
+#plt.show()
 plt.clf()
+
+def chi2(p, x, y):
+    pred = three_lorentz_fit(p, x)
+    error = np.mean(np.abs(pred - y))
+    return np.sum((pred - y)**2/error)
+
+
+
+
+step_n = 10                                 # Number of steps to take
+
+p_init = p.copy()                           # Initial Parameters
+
+step_size = np.array([0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001])   # Size of steps
+
+chain = np.zeros([step_n, len(p_init)+1])   # Initializing the chain
+chain[0, 0:-1] = p_init
+
+cur_pos = chain[0, 0:-1]
+
+cur_chi = chi2(cur_pos, t, d)
+
+chain[0, -1] = cur_chi
+
+
+test = step_size*np.random.randn(len(step_size))
+print(test)
+print(chi2(chain[0, 0:-1]+test, t, d))
+
+assert(0==1)
+for i in range(1, step_n):
+
+    # Finding new position
+    new_pos = chain[i-1, 0:-1] + step_size*np.random.randn(len(step_size))
+
+    # Finding new chi square
+    new_chi = chi2(new_pos, t, d)
+    
+    if new_chi < cur_chi:
+        accept = True
+    else:
+        delt = new_chi - cur_chi
+        #print(new_chi)
+        prob = np.exp(-0.5*delt)
+        if np.random.rand() < prob:
+            accept = True
+        else:
+            accept = False
+    if accept:
+        cur_chi = new_chi
+        cur_pos = new_pos
+
+    chain[i, 0:-1] = cur_pos
+    chain[i, -1] = cur_chi
+
+
+#print(chain[:, 0:-1])
+
+          
+
     
 
 
