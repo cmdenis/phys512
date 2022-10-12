@@ -29,7 +29,6 @@ def lorentz_fit(p, t):
 
 
 
-times = np.arange(min(t), max(t), t[1]-t[0])
 
 # Initial parameter guess
 p = np.array([1, 0.00018, 0.00005])
@@ -41,8 +40,8 @@ plt.title("Sideband Raw Signal")
 
 
 
-# We do the procedure 5 times to try it out
-for j in range(5):
+# We do the procedure 10 times to try it out
+for j in range(10):
     pred, grad = lorentz_fit(p, t)
 
     # Residuals
@@ -56,7 +55,7 @@ for j in range(5):
 
     p = p + dp
 
-    print(p, dp)
+    #print("\nParameters:", p, "\nDisplacement", dp)
 
 plt.plot(t, lorentz_fit(p, t)[0], label = "Best Fit")
 plt.legend()
@@ -67,6 +66,4 @@ plt.show()
 plt.clf()
     
 
-
-
-
+print("The best-fit parameters are:", p)

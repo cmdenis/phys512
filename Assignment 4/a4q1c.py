@@ -51,7 +51,7 @@ plt.title("Sideband Raw Signal")
 
 
 # We do the procedure 5 times to try it out
-for j in range(5):
+for j in range(10):
     # Calculating predicted fit and gradient
     pred = lorentz_fit(p, t)
     grad = grad_f(lorentz_fit, p, t)
@@ -63,7 +63,8 @@ for j in range(5):
     # Calculate the new best parameter
     dp = np.linalg.inv(lhs)@rhs
     p = p + dp
-    #print(p, dp)
+    # Printing results
+    #print("\nParameters:", p, "\nDisplacement", dp)
 
 plt.plot(t, lorentz_fit(p, t), label = "Best Fit")
 plt.legend()
@@ -73,6 +74,7 @@ plt.savefig("figs/a4q1c_newton_method.jpg")
 plt.show()
 plt.clf()
     
+print("The best-fit parameters are:", p)
 
 
 
