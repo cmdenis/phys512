@@ -65,6 +65,7 @@ for j in range(nb_iter):
 
 # Finding the 1) predicted data 2) the grad of the function
 pred, grad = lorentz_fit(p, t)
+
 print("The parameters are:", p)
 
 # Finding the noise in our data

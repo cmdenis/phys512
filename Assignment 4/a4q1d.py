@@ -18,7 +18,7 @@ def p_deriv(func, p_ind, p, t):
         dp[p_ind] = shift 
     else:
         raise ValueError("Derivative index must be an integer.")
-    return (func(p + dp, t) - func(p, t))/shift
+    return (func(p + dp, t) - func(p - dp, t))/(2*shift)    # Two sided derivative
 
 
 # We use Newton's method to find the best fit for the data
@@ -50,8 +50,8 @@ plt.title("Sideband Raw Signal")
 
 
 
-# We do the procedure 5 times to try it out
-for j in range(5):
+# We do the procedure 10 times
+for j in range(20):
     # Calculating predicted fit and gradient
     pred = three_lorentz_fit(p, t)
     grad = grad_f(three_lorentz_fit, p, t)
@@ -64,6 +64,27 @@ for j in range(5):
     dp = np.linalg.inv(lhs)@rhs
     p = p + dp
     #print(p, dp)
+
+
+'''Error finding part'''
+
+# Finding the 1) predicted data 2) the grad of the function
+pred = three_lorentz_fit(p, t)
+grad = grad_f(three_lorentz_fit, p, t)
+print("The parameters are:", p)
+
+# Finding the noise in our data
+err = np.mean(np.abs(pred - d))
+
+
+# Finding the error on the parameters
+lhs = grad.T@grad
+cov_mat = np.linalg.inv(lhs)*err
+p_err = np.sqrt(np.diagonal(cov_mat))
+
+print("And the error on them are:", p_err)
+
+'''Plotting part'''
 
 plt.plot(t, three_lorentz_fit(p, t), label = "Best Fit")
 plt.legend()

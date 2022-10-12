@@ -18,7 +18,7 @@ def p_deriv(func, p_ind, p, t):
         dp[p_ind] = shift 
     else:
         raise ValueError("Derivative index must be an integer.")
-    return (func(p + dp, t) - func(p, t))/shift
+    return (func(p + dp, t) - func(p - dp, t))/(2*shift)    # Two sided derivative
 
 
 # We use Newton's method to find the best fit for the data
@@ -47,7 +47,7 @@ p = np.array([1.4, 0.0002, 0.00002, 0.2, 0.2, 0.00005])
 
 
 # We do the procedure 5 times to try it out
-for j in range(15):
+for j in range(25):
     # Calculating predicted fit and gradient
     pred = three_lorentz_fit(p, t)
     grad = grad_f(three_lorentz_fit, p, t)
@@ -66,7 +66,7 @@ for j in range(15):
 # Finding the 1) predicted data 2) the grad of the function
 pred = three_lorentz_fit(p, t)
 grad = grad_f(three_lorentz_fit, p, t)
-print("The parameters are:", p)
+#print("The parameters are:", p)
 
 # Finding the noise in our data
 err = np.mean(np.abs(pred - d))
@@ -77,16 +77,51 @@ lhs = grad.T@grad
 cov_mat = np.linalg.inv(lhs)*err
 p_err = np.sqrt(np.diagonal(cov_mat))
 
-print("And the error on them are:", p_err)
+#print("And the error on them are:", p_err)
+
+
+
+
+
+'''Varying the parameters and looking at the chi^2 part'''
+
+# We define a chi^2 taking function
+def chi2(p, x, y):
+    pred = three_lorentz_fit(p, x)
+    error = np.mean(np.abs(pred - y))
+    return np.sum((pred - y)**2/error)
+
+print(cov_mat.shape[1])
+
+alt_chi = np.zeros(len(p))
+plt.plot(t, d, label = "Data")
+for i in range(len(p)):
+    pert = np.zeros(len(p)) 
+    pert[i] = np.sqrt(cov_mat[i, i])
+    alt_chi[i] = chi2(p + pert, t, d) - chi2(p, t, d)
+    plt.plot(t, three_lorentz_fit(p + pert, t), label = "Param perturbation "+str(i+1))
+
+
+
+print([np.sqrt(cov_mat[i, i]) for i in range(6)])
+print(alt_chi)
+
+
+
+
+
+
+
+
+
 
 '''Plotting part'''
 
 
-plt.plot(t, d- three_lorentz_fit(p, t), label = "Data")
 plt.title("Sideband Residuals")
 plt.xlabel("Time (t)")
 plt.ylabel("Amplitude")
-plt.plot(t, three_lorentz_fit(p, t)*0, label = "Best Fit")
+plt.plot(t, three_lorentz_fit(p, t), label = "Best Fit")
 plt.legend()
 plt.savefig("figs/a4q1e_residuals.jpg")
 plt.show()
