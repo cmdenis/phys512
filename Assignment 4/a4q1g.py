@@ -80,11 +80,11 @@ def chi2(p, x, y):
 
 
 
-step_n = 10                                 # Number of steps to take
+step_n = 10000                                 # Number of steps to take
 
 p_init = p.copy()                           # Initial Parameters
 
-step_size = np.array([0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001])   # Size of steps
+step_size = np.array([0.00000001, 0.000000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001])   # Size of steps
 
 chain = np.zeros([step_n, len(p_init)+1])   # Initializing the chain
 chain[0, 0:-1] = p_init
@@ -97,10 +97,10 @@ chain[0, -1] = cur_chi
 
 
 test = step_size*np.random.randn(len(step_size))
-print(test)
-print(chi2(chain[0, 0:-1]+test, t, d))
+#print(test)
+#print(chi2(chain[0, 0:-1]+test, t, d))
 
-assert(0==1)
+#assert(0==1)
 for i in range(1, step_n):
 
     # Finding new position
@@ -108,12 +108,17 @@ for i in range(1, step_n):
 
     # Finding new chi square
     new_chi = chi2(new_pos, t, d)
-    
+
+    print("The new Chi^2 is:", new_chi)
+    print("The old Chi^2 is:", cur_chi)
+
     if new_chi < cur_chi:
+        print("Then we accept the change.")
         accept = True
     else:
         delt = new_chi - cur_chi
-        #print(new_chi)
+        print("Then we don't immediately accept the change. Their difference is", delt)
+        
         prob = np.exp(-0.5*delt)
         if np.random.rand() < prob:
             accept = True
@@ -128,6 +133,9 @@ for i in range(1, step_n):
 
 
 #print(chain[:, 0:-1])
+
+plt.plot(chain[:, 0])
+plt.show()
 
           
 
