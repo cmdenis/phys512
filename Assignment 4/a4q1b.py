@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-# We start by loading the data
+'''We start by loading the data'''
 
 stuff = np.load('mcmc/sidebands.npz')
 t = stuff['time']
@@ -10,7 +10,7 @@ d = stuff['signal']
 
 
 
-# We use Newton's method to find the best fit for the data
+'''We use Newton's method to find the best fit for the data'''
 
 # We define our fit function
 def lorentz_fit(p, t):
@@ -29,42 +29,59 @@ def lorentz_fit(p, t):
 
 
 
-times = np.arange(min(t), max(t), t[1]-t[0])
+
+
+'''We do the "Newton method" 10 times'''
+
+nb_iter = 10
 
 # Initial parameter guess
 p = np.array([1, 0.00018, 0.00005])
-
-# Show guess
 plt.plot(t, lorentz_fit(p, t)[0], label = "Guess Fit")
-plt.plot(t, d, label = "Data")
-plt.title("Sideband Raw Signal")
 
+# Loop for each step in Newton's method
+for j in range(nb_iter):
 
-
-# We do the procedure 5 times to try it out
-for j in range(5):
+    # Computing 1) Predicted points 2) Gradient
     pred, grad = lorentz_fit(p, t)
 
     # Residuals
     r = d - pred
 
-
+    # Useful matrices
     lhs = grad.T@grad
     rhs = grad.T@r 
 
+    # Computing the step
     dp = np.linalg.inv(lhs)@rhs
 
+    # Finding a closer parameter
     p = p + dp
 
-    print(p, dp)
 
+
+
+'''Error finding part'''
+
+# Finding the 1) predicted data 2) the grad of the function
+pred, grad = lorentz_fit(p, t)
+print("The parameters are:", p)
+
+# Finding the noise in our data
+err = np.mean(np.abs(pred - d))
+
+
+# Finding the error on the parameters
+lhs = grad.T@grad
+cov_mat = np.linalg.inv(lhs)*err
+p_err = np.sqrt(np.diagonal(cov_mat))
+
+print("And the error on them are:", p_err)
+
+plt.plot(t, d, label = "Data")
 plt.plot(t, lorentz_fit(p, t)[0], label = "Best Fit")
 plt.legend()
+plt.title("Sideband Signal With Fits")
 plt.savefig("figs/a4q1a_newton_method.jpg")
 plt.show()
 plt.clf()
-    
-
-
-
-
