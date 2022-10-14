@@ -32,7 +32,11 @@ We can see the results in the following plot, with the best-fit parameters and t
 
 ### Part c)
 
-Our answers in **c** are not statistically significantly different from the answers in **a**. They all fall well within the error margin found in **a**.
+Our answers in **c** are not statistically significantly different from the answers in **a**. They all fall well within the error margin found in **a**. I know this is not a very quantitative argument, but: I can't even see the difference between most of the parameters' values which means that they are the same up to at least 8 significant figures, so really close. This also makes some decent sense considering that we used a two sided derivative which does a decent job.
+
+The resulting parameter values and the associated plot is as follows.
+
+![a4q1c_newton_method](figs/a4q1c_newton_method.jpg)
 
 ### Part d)
 
