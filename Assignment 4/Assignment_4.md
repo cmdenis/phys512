@@ -59,9 +59,11 @@ These errors are about 3 orders of magnitude smaller than their associated param
 
 If we look at the residuals for the data and the beat fit, we clearly see some structure in there.
 
-![fig](figs/a4q1e_residuals.jpg)
+![a4q1e_newton_method](figs/a4q1e_newton_method.jpg)
 
-The first noticeable thing is that there are some "saw-tooth" in the data. At first I thought that this was coming from taking the derivative rather crudely but the fitting function is too smooth for these artifacts to occur. Hence I suppose that it must be coming from the data.
+The first noticeable thing is that there are some "saw-tooth" in the data. At first I thought that this was coming from taking the derivative rather crudely but the fitting function is too smooth for these artifacts to occur. Hence I suppose that it must be coming from the data. Maybe some sort of aliasing or ramping could be to blame.
+
+The second thing that's noticeable is that, at the center there are a lot of "wiggles". If I'm not mistaken, usually this comes from peaks being not centered properly on the data's peaks. This seems to suggest either that we, for some reason, are not at the correct parameter values (perhaps we're at the wrong minimum of the $\Chi^2$) or that the model simply does not describe the data well enough. Maybe we would get something better with a Gaussian? Or fitting with more peaks?
 
 ### Part f)
 
