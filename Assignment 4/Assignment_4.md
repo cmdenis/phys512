@@ -91,7 +91,7 @@ We can also see the different realizations on the following plot:
 
 This was done by generating a random perturbation with magnitude and correlation between parameter perturbation based on the covariance matrix. For each of these random generations we simply added them to the best fit parameters and computed the difference in $\Chi^2$ as well as plotted the result.
 
-The resulting variation in $\Chi^2$ is of order unity. I would have expected to be closer to 1, however we often get results a bit bigger. When running this procedure 20 000 times, we obtained a mean $\Chi^2$ difference of about 1.60. I have difficulty explaining where this value comes from. My intuition says it would converge towards 1, but numerically, it doesn't look like it's the case.
+The resulting variation in $\Chi^2$ is of order unity. I would have expected to be closer to 1, however we often get results a bit bigger. When running this procedure 20 000 times, we obtained a mean $\Chi^2$ difference of about 1.60. I have difficulty explaining where this value comes from. My intuition says it would converge towards 1, but numerically, it doesn't look like it's the case. Furthermore, I got some negative variations of the $\Chi^2$. If we were close enough to the real minimum $\Chi^2$ and that there was only one neighboring minimum this would not make sense, however, as can be seen in the corner plots in **g)**, the minimum region does not appear to be this regular. Hence, I cannot automatically blame this on an error in my code, otherwise I probably would...
 
 Anyhow, a difference of 1 is definitely not significant, therefore: **yes** it is reasonable.
 
