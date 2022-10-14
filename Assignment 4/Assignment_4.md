@@ -67,4 +67,33 @@ The second thing that's noticeable is that, at the center there are a lot of "wi
 
 ### Part f)
 
+In this part we generated different realizations of the $\Chi^2$ given perturbations of the initial parameters. We obtain outputs of the likes of:
+
+```output
+Alternative fit 1  Chi^2 difference: 1.8524668897282481
+Alternative fit 2  Chi^2 difference: 5.319222928700583
+Alternative fit 3  Chi^2 difference: 1.0541127803985546
+Alternative fit 4  Chi^2 difference: -2.4109559466214705
+Alternative fit 5  Chi^2 difference: 6.368051027757247
+Alternative fit 6  Chi^2 difference: 3.194188949971476
+Alternative fit 7  Chi^2 difference: -0.5599786740458512
+Alternative fit 8  Chi^2 difference: -2.0405841538515688
+Alternative fit 9  Chi^2 difference: -4.093283780098091
+Alternative fit 10  Chi^2 difference: 1.6749483074559066
+Mean difference in Chi^2: 1.0358188329395035
+```
+
+We can also see the different realizations on the following plot:
+
+![a4q1f_newton_method](figs/a4q1f_newton_method.jpg)
+
+This was done by generating a random perturbation with magnitude and correlation between parameter perturbation based on the covariance matrix. For each of these random generations we simply added them to the best fit parameters and computed the difference in $\Chi^2$ as well as plotted the result.
+
+The resulting variation in $\Chi^2$ is of order unity. I would have expected to be closer to 1, however we often get results a bit bigger. When running this procedure 20 000 times, we obtained a mean $\Chi^2$ difference of about 1.60. I have difficulty explaining where this value comes from. My intuition says it would converge towards 1, but numerically, it doesn't look like it's the case.
+
+Anyhow, a difference of 1 is definitely not significant, therefore: **yes** it is reasonable.
+
+
 ### Part g)
+
+### Part h)
