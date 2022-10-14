@@ -25,7 +25,6 @@ def p_deriv(func, p_ind, p, t):
         raise ValueError("Derivative index must be an integer.")
     return (func(p + dp, t) - func(p - dp, t))/(2*shift)    # Two sided derivative
 
-
 # We use Newton's method to find the best fit for the data
 
 # We define our fit function
@@ -41,7 +40,6 @@ def grad_f(f, p, t):
     for param in range(len(p)):
         grad[:, param] = p_deriv(f, param, p, t)
     return grad
-
 
 times = np.arange(min(t), max(t), t[1]-t[0])
 
@@ -62,26 +60,20 @@ while looper:
     # Calculating predicted fit and gradient
     pred = lorentz_fit(p, t)
     grad = grad_f(lorentz_fit, p, t)
-
     # Residuals
     r = d - pred
-
     # Fragmenting linear algera stuff
     lhs = grad.T@grad
     rhs = grad.T@r 
-
     # Applying a step
     dp = np.linalg.inv(lhs)@rhs
     p = p + dp
-
     new_chi = chi2(p, t, d)
-
     # Check if if Chi^2 is minimized enough
     if (old_chi - new_chi) < 0.01:
         looper = False
     else:
         old_chi = new_chi
-
     #print("\nParameters:", p, "\nDisplacement", dp)
 
 
@@ -95,7 +87,3 @@ plt.show()
 plt.clf()
     
 print("The best-fit parameters are:", p)
-
-
-
-
