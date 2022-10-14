@@ -93,7 +93,20 @@ The resulting variation in $\Chi^2$ is of order unity. I would have expected to 
 
 Anyhow, a difference of 1 is definitely not significant, therefore: **yes** it is reasonable.
 
-
 ### Part g)
+
+For the MCMC version of the same fitting problem we obtain results similar to:
+
+```output
+The best fit parameters are: [1.44069983e+00 1.92611012e-04 1.61603381e-05 1.02895450e-01
+ 6.11206779e-02 4.44680841e-05]
+Their error is: [2.25844235e-03 2.77280794e-08 4.79590333e-08 2.78745860e-03
+ 2.14455503e-03 3.88338719e-07]
+With Chi^2: 1678.291346589708
+```
+
+again, this is respective to parameters in the same order as before.
+
+![a4q1g_mcmc_parameters](figs/a4q1g_mcmc_parameters.jpg)
 
 ### Part h)
