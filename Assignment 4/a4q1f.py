@@ -101,11 +101,12 @@ for i in range(10):
 
 # Plotting part
 og_chi = chi2(p, t, d)
+print("Parameters' Chi^2 square:", og_chi)
 plt.plot(t, three_lorentz_fit(p, t), label = "Best Fit")
 sample_diff_chi = []
 for i in range(len(var_p)):
     sample_diff_chi.append(chi2(var_p[i], t, d) - og_chi)
-    #plt.plot(t, three_lorentz_fit(var_p[i], t), label = "Alt Fit #"+str(i+1))
+    plt.plot(t, three_lorentz_fit(var_p[i], t), label = "Alt Fit #"+str(i+1))
     print("Alternative fit", i+1, " Chi^2 difference:", sample_diff_chi[-1])
 
 print("Mean difference in Chi^2:", np.mean(sample_diff_chi))
