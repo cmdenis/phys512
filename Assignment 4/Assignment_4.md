@@ -95,6 +95,8 @@ Anyhow, a difference of 1 is definitely not significant, therefore: **yes** it i
 
 ### Part g)
 
+For this part, we first found the best fit using Newton's method. We then used this best fit as our initial guess for starting the MCMC. For each step in the chain, we take a random step in a parameter-space direction weighed by the uncertainties on those parameters. We repeat this 10 000 times. It seems we could have used a shorter time-span to get similar results, but since it didn't take much longer to do 10 000, we figured, we might as well. Once this is done, we took the mean value after 4000 steps (very exaggerated, however with parameter values not as close to the minimum, this was actually useful) to not catch the burn-in phase. 
+
 For the MCMC version of the same fitting problem we obtain results similar to:
 
 ```output
@@ -105,8 +107,18 @@ Their error is: [2.25844235e-03 2.77280794e-08 4.79590333e-08 2.78745860e-03
 With Chi^2: 1678.291346589708
 ```
 
-again, this is respective to parameters in the same order as before.
+again, this is respective to parameters in the same order as described before.
 
 ![a4q1g_mcmc_parameters](figs/a4q1g_mcmc_parameters.jpg)
+
+From the previous plot, it seems like the trajectories have indeed converged since they are remaining constant. With this specific fitting problem, we chose guesses that were very close to the minimum of the $\Chi^2$ landscape. This means that we have a very small "burn in" period, almost not visible at all in fact.
+
+To further understand what is happening with our MCMC, we can also plot the multidimensional cross sections using the `corner` library. We find the following:
+
+![a4_mcmc_corner_plot](figs/a4_mcmc_cornerplot.jpg)
+
+From this, it seems clear that there is some correlation between the b and c parameters. In other words the eigenvectors of the hessian at the found $\Chi^2$ minimum do not correspond directly to the original parametrization.
+
+An interesting remark is that when experimenting with the chain, it seemed very sensible to the initial parameters given, as if to suggest that there were multiple minimum. Discussion with Rigel lead to the hypothesis of a "noisy bottom $\Chi^2$ surface". Well, in fact, looking at the "corner-plots" we do have what looks like a "grainy bottom" with irregularities, possibly leading to multiple local minima.
 
 ### Part h)

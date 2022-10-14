@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy import integrate
 from matplotlib import pyplot as plt
+import corner
 
 # We start by loading the data
 stuff = np.load('mcmc/sidebands.npz')
@@ -159,7 +160,25 @@ print("With Chi^2:", chi2(best_param[0:-1], t, d))
 plt.plot(chain[:, 0:-1], label = ["a", "t_0", "w", "b", "c", "dt"])
 plt.title("Parameters Trajectory in MCMC")
 plt.legend()
+plt.xlabel("MCMC Steps")
+plt.ylabel("Parameter Value")
 plt.savefig("figs/a4q1g_mcmc_parameters.jpg")
+plt.show()
+plt.clf()
+
+corner.corner(
+    chain[:, 0:-1],
+    labels=[
+        r"$a$",
+        r"$t_0$",
+        r"$w$",
+        r"$b$",
+        r"$c$",
+        r"$dt$",
+    ]
+    )
+plt.savefig("figs/a4_mcmc_cornerplot.jpg")
+
 plt.show()
 
           
