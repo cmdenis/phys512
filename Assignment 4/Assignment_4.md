@@ -83,6 +83,8 @@ Alternative fit 10  Chi^2 difference: 1.6749483074559066
 Mean difference in Chi^2: 1.0358188329395035
 ```
 
+The $\Chi^2$ of the found parameters was around 1686. This is a bit small since we would expect the $\Chi^2$ to be of the same order as the number of degrees of freedom, which is about 100000 in our case. This might be due to the fact that our data is relatively noisy, hence under shooting the $\Chi^2$.
+
 We can also see the different realizations on the following plot:
 
 ![a4q1f_newton_method](figs/a4q1f_newton_method.jpg)
