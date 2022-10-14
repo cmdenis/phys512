@@ -10,7 +10,7 @@ d = stuff['signal']
 
 # First we create a derivative taking function
 def p_deriv(func, p_ind, p, t):
-    shift = 1e-8
+    shift = 1e-6
     # Creating array
     dp = np.zeros(len(p))
     # Check if derivative index is an integer
@@ -41,16 +41,16 @@ def grad_f(f, p, t):
 times = np.arange(min(t), max(t), t[1]-t[0])
 
 # Initial parameter guess
-p = np.array([1.4, 0.0002, 0.00002, 0.2, 0.2, 0.00005])
+p = np.array([1.4, 0.00019, 0.00002, 0.15, 0.15, 0.00005])
 
 # Show guess
 plt.plot(t, three_lorentz_fit(p, t), label = "Guess Fit")
 plt.plot(t, d, label = "Data")
-plt.title("Sideband Raw Signal")
+plt.title("Signal and Newton Method Fit")
 
 
 
-# We do the procedure 10 times
+# We do the Newton method a bunch of times
 for j in range(20):
     # Calculating predicted fit and gradient
     pred = three_lorentz_fit(p, t)

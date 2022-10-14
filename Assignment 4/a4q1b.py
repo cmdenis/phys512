@@ -36,7 +36,7 @@ def lorentz_fit(p, t):
 nb_iter = 10
 
 # Initial parameter guess
-p = np.array([1, 0.00018, 0.00005])
+p = np.array([1, 0.0002, 0.00005])
 plt.plot(t, lorentz_fit(p, t)[0], label = "Guess Fit")
 
 # Loop for each step in Newton's method
@@ -74,8 +74,11 @@ err = np.mean(np.abs(pred - d))
 
 # Finding the error on the parameters
 lhs = grad.T@grad
-cov_mat = np.linalg.inv(lhs)*err
+cov_mat = np.linalg.inv(lhs)*err 
 p_err = np.sqrt(np.diagonal(cov_mat))
+
+# To generate the instance of d = np.random.multivariate_normal([0, 0, 0], fit.covar)
+
 
 print("And the error on them are:", p_err)
 

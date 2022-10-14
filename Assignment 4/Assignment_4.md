@@ -8,6 +8,20 @@ For PHYS-512
 
 ### Part a)
 
+To answer this question, we start by loading the data. We then define a function for the Lorentz fit that also returns the derivatives of the function with respect to the different parameters (the gradient).
+
+We try to find the best parameters using Newton's method, which consists in linearizing the "$\Chi^2$ surface" to second order and then finding a step size that will get us closer to the minimum of the $\Chi^2$ function. We apply this procedure as long as the change in $\Chi^2$ between two steps is bigger than 0.01, which is a somewhat arbitrary decision. We could have stopped at 1 probably but since it doesn't require much more effort, why not?
+
+We used as initial guesses $a=1$, $t_0 = 0.00018$ and $w=0.00005$. Our final fit values were found to be
+
+`[1.42268321e+00 1.92359513e-04 1.79268497e-05]`
+
+Respectively for $a$, $t_0$ and $w$. We can also plot the resulting curve:
+
+![a4q1a_newton_method](figs/a4q1a_newton_method.jpg)
+
+The match appears pretty good, although the bumps are definitely not accounted for by the single Lorentzian.
+
 ### Part b)
 
 ### Part c)

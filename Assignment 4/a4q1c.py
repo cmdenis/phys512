@@ -18,7 +18,7 @@ def p_deriv(func, p_ind, p, t):
         dp[p_ind] = shift 
     else:
         raise ValueError("Derivative index must be an integer.")
-    return (func(p + dp, t) - func(p, t))/shift
+    return (func(p + dp, t) - func(p - dp, t))/(2*shift)    # Two sided derivative
 
 
 # We use Newton's method to find the best fit for the data
@@ -46,7 +46,7 @@ p = np.array([1, 0.00018, 0.00005])
 # Show guess
 plt.plot(t, lorentz_fit(p, t), label = "Guess Fit")
 plt.plot(t, d, label = "Data")
-plt.title("Sideband Raw Signal")
+plt.title("Signal with fit")
 
 
 
@@ -65,6 +65,8 @@ for j in range(10):
     p = p + dp
     # Printing results
     #print("\nParameters:", p, "\nDisplacement", dp)
+
+
 
 plt.plot(t, lorentz_fit(p, t), label = "Best Fit")
 plt.legend()

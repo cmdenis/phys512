@@ -1,9 +1,9 @@
 import numpy as np 
+from tqdm import tqdm
 from scipy import integrate
 from matplotlib import pyplot as plt
 
 # We start by loading the data
-
 stuff = np.load('mcmc/sidebands.npz')
 t = stuff['time']
 d = stuff['signal']
@@ -21,7 +21,7 @@ def p_deriv(func, p_ind, p, t):
     return (func(p + dp, t) - func(p, t))/shift
 
 
-# We use Newton's method to find the best fit for the data
+''' We use Newton's method to find the best fit for the data'''
 
 # We define our fit function
 def three_lorentz_fit(p, t):
@@ -37,17 +37,11 @@ def grad_f(f, p, t):
         grad[:, param] = p_deriv(f, param, p, t)
     return grad
 
-
-times = np.arange(min(t), max(t), t[1]-t[0])
-
 # Initial parameter guess
 p = np.array([1.4, 0.0002, 0.00002, 0.2, 0.2, 0.00005])
 
-
-
-
-# We do the procedure 5 times to try it out
-for j in range(5):
+# We do the procedure 20 times to try it out
+for j in range(20):
     # Calculating predicted fit and gradient
     pred = three_lorentz_fit(p, t)
     grad = grad_f(three_lorentz_fit, p, t)
@@ -59,18 +53,6 @@ for j in range(5):
     # Calculate the new best parameter
     dp = np.linalg.inv(lhs)@rhs
     p = p + dp
-    #print(p, dp)
-
-
-plt.plot(t, d- three_lorentz_fit(p, t), label = "Data")
-plt.title("Sideband Residuals")
-plt.xlabel("Time (t)")
-plt.ylabel("Amplitude")
-plt.plot(t, three_lorentz_fit(p, t)*0, label = "Best Fit")
-plt.legend()
-plt.savefig("figs/a4q13_residuals.jpg")
-#plt.show()
-plt.clf()
 
 def chi2(p, x, y):
     pred = three_lorentz_fit(p, x)
@@ -80,11 +62,20 @@ def chi2(p, x, y):
 
 
 
+'''Now the MCMC part'''
+
 step_n = 10000                                 # Number of steps to take
 
-p_init = p.copy()                           # Initial Parameters
+p_init = p.copy()*1                          # Initial Parameters
 
-step_size = np.array([0.00000001, 0.000000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001])   # Size of steps
+step_size = np.array([
+    2.05433608e-03, 
+    2.43562762e-08, 
+    3.35517104e-08, 
+    1.95770945e-03, 
+    1.91677608e-03, 
+    2.93598326e-07
+    ])   # Size of steps
 
 chain = np.zeros([step_n, len(p_init)+1])   # Initializing the chain
 chain[0, 0:-1] = p_init
@@ -101,7 +92,7 @@ test = step_size*np.random.randn(len(step_size))
 #print(chi2(chain[0, 0:-1]+test, t, d))
 
 #assert(0==1)
-for i in range(1, step_n):
+for i in tqdm(range(1, step_n)):
 
     # Finding new position
     new_pos = chain[i-1, 0:-1] + step_size*np.random.randn(len(step_size))
@@ -109,15 +100,15 @@ for i in range(1, step_n):
     # Finding new chi square
     new_chi = chi2(new_pos, t, d)
 
-    print("The new Chi^2 is:", new_chi)
-    print("The old Chi^2 is:", cur_chi)
+    #print("The new Chi^2 is:", new_chi)
+    #print("The old Chi^2 is:", cur_chi)
 
     if new_chi < cur_chi:
-        print("Then we accept the change.")
+        #print("Then we accept the change.")
         accept = True
     else:
         delt = new_chi - cur_chi
-        print("Then we don't immediately accept the change. Their difference is", delt)
+        #print("Then we don't immediately accept the change. Their difference is", delt)
         
         prob = np.exp(-0.5*delt)
         if np.random.rand() < prob:
@@ -132,9 +123,15 @@ for i in range(1, step_n):
     chain[i, -1] = cur_chi
 
 
-#print(chain[:, 0:-1])
+# Printing values
+best_param = np.mean(chain[4000:-1, :], axis = 0)
+param_std = np.std(chain[4000:-1, :], axis = 0)
 
-plt.plot(chain[:, 0])
+print("The best fit parameters are:", best_param[0:-1])
+print("Their error is:", param_std[0:-1])
+print("With Chi^2:", chi2(best_param[0:-1], t, d))
+
+plt.plot(chain[:, 0:-1])
 plt.show()
 
           
