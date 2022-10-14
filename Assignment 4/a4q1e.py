@@ -3,14 +3,19 @@ from scipy import integrate
 from matplotlib import pyplot as plt
 
 # We start by loading the data
-
 stuff = np.load('mcmc/sidebands.npz')
 t = stuff['time']
 d = stuff['signal']
 
+# Define a chi^2 function
+def chi2(p, x, y):
+    pred = three_lorentz_fit(p, x)
+    error = np.mean(np.abs(pred - y))
+    return np.sum((pred - y)**2/error)
+
 # First we create a derivative taking function
 def p_deriv(func, p_ind, p, t):
-    shift = 1e-8
+    shift = 1e-6
     # Creating array
     dp = np.zeros(len(p))
     # Check if derivative index is an integer
@@ -18,7 +23,7 @@ def p_deriv(func, p_ind, p, t):
         dp[p_ind] = shift 
     else:
         raise ValueError("Derivative index must be an integer.")
-    return (func(p + dp, t) - func(p, t))/shift
+    return (func(p + dp, t) - func(p - dp, t))/(2*shift)    # Two sided derivative
 
 
 # We use Newton's method to find the best fit for the data
@@ -37,40 +42,46 @@ def grad_f(f, p, t):
         grad[:, param] = p_deriv(f, param, p, t)
     return grad
 
-
-times = np.arange(min(t), max(t), t[1]-t[0])
-
 # Initial parameter guess
-p = np.array([1.4, 0.0002, 0.00002, 0.2, 0.2, 0.00005])
+p = np.array([1.4, 0.00019, 0.00002, 0.15, 0.15, 0.00005])
 
+# Starting the initial loop conditions
+looper = True
+old_chi = chi2(p, t, d)
+trunc = 0
 
-
-
-# We do the procedure 5 times to try it out
-for j in range(15):
+# We do the procedure until chi^2 condition is satisfied
+while looper:
     # Calculating predicted fit and gradient
     pred = three_lorentz_fit(p, t)
     grad = grad_f(three_lorentz_fit, p, t)
     # Residuals
     r = d - pred
-    # Fragmenting matrix operations
+    # Fragmenting linear algera stuff
     lhs = grad.T@grad
     rhs = grad.T@r 
-    # Calculate the new best parameter
+    # Applying a step
     dp = np.linalg.inv(lhs)@rhs
     p = p + dp
-    #print(p, dp)
+    new_chi = chi2(p, t, d)
+    # Check if if Chi^2 is minimized enough
+    if (old_chi - new_chi) < 0.01:
+        looper = False
+    else:
+        old_chi = new_chi
+    #print("\nParameters:", p, "\nDisplacement", dp)
+
 
 '''Error finding part'''
+
+# Estimating the noise in our data
+err = np.std(d[-100:-1])
+print("Estimated noise:", err)
 
 # Finding the 1) predicted data 2) the grad of the function
 pred = three_lorentz_fit(p, t)
 grad = grad_f(three_lorentz_fit, p, t)
 print("The parameters are:", p)
-
-# Finding the noise in our data
-err = np.mean(np.abs(pred - d))
-
 
 # Finding the error on the parameters
 lhs = grad.T@grad
@@ -79,20 +90,13 @@ p_err = np.sqrt(np.diagonal(cov_mat))
 
 print("And the error on them are:", p_err)
 
-'''Plotting part'''
-
-
-plt.plot(t, d- three_lorentz_fit(p, t), label = "Data")
-plt.title("Sideband Residuals")
+# Plotting part
+plt.plot(t, d - three_lorentz_fit(p, t), label = "Data")
+plt.plot(t, 0*three_lorentz_fit(p, t), label = "Best Fit")
+plt.title("Newton Method Residuals")
+plt.legend()
 plt.xlabel("Time (t)")
 plt.ylabel("Amplitude")
-plt.plot(t, three_lorentz_fit(p, t)*0, label = "Best Fit")
-plt.legend()
-plt.savefig("figs/a4q1e_residuals.jpg")
+plt.savefig("figs/a4q1e_newton_method.jpg")
 plt.show()
 plt.clf()
-    
-
-
-
-
