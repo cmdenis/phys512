@@ -40,6 +40,21 @@ The resulting parameter values and the associated plot is as follows.
 
 ### Part d)
 
+We repeat the same procedure from part c), but we use the given model, with three Lorentzians. By graphical trial and error, we found some decent estimates for the parameters: $a = 1.4$, $t_0=0.00019$, $w=0.00002$, $b=0.15$, $c=0.15$ and $dt=0.00005$. We obtain the following plot with the best fit curve:
+
+![a4q1d_newton_method](figs/a4q1d_newton_method.jpg)
+
+The outputted result (with the parameters in the same order as described before):
+
+```code
+The parameters are: [1.44301421e+00 1.92576200e-04 1.60607936e-05 1.03953867e-01
+ 6.49588141e-02 4.45065423e-05]
+And the error on them are: [1.26692059e-03 1.50194459e-08 2.68683914e-08 1.20829861e-03
+ 1.18308416e-03 1.80801379e-07]
+ ```
+
+These errors are about 3 orders of magnitude smaller than their associated parameter values.
+
 ### Part e)
 
 If we look at the residuals for the data and the beat fit, we clearly see some structure in there.
