@@ -109,7 +109,7 @@ print(alt_chi)
 
 
 
-
+# To generate the instance of d = np.random.multivariate_normal([0, 0, 0], fit.covar)
 
 
 

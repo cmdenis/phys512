@@ -24,6 +24,12 @@ The match appears pretty good, although the bumps are definitely not accounted f
 
 ### Part b)
 
+To estimate the noise, we use the relatively flat tails of the function. Specifically, we used the right tail and cut off the furthest 100 data points. We obtained a noise of about `0.005`.
+
+We can see the results in the following plot, with the best-fit parameters and their errors. These are listed in the order $a$, $t_0$ and $w$.
+
+![a4q1b_newton_method](figs/a4q1b_newton_method.jpg)
+
 ### Part c)
 
 Our answers in **c** are not statistically significantly different from the answers in **a**. They all fall well within the error margin found in **a**.

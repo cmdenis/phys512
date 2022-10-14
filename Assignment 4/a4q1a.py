@@ -45,7 +45,7 @@ plt.title("Sideband Signal with Fit")
 looper = True
 old_chi = chi2(p, t, d)
 
-# We do the procedure 10 times to try it out
+# We do the procedure until chi^2 condition is satisfied
 while looper:
     # Find useful prediction and grad matrix
     pred, grad = lorentz_fit(p, t)
