@@ -124,3 +124,11 @@ From this, it seems clear that there is some correlation between the b and c par
 An interesting remark is that when experimenting with the chain, it seemed very sensible to the initial parameters given, as if to suggest that there were multiple minimum. Discussion with Rigel lead to the hypothesis of a "noisy bottom $\Chi^2$ surface". Well, in fact, looking at the "corner-plots" we do have what looks like a "grainy bottom" with irregularities, possibly leading to multiple local minima.
 
 ### Part h)
+
+The width $\Delta s$ of the the cavity should be given by the equation
+
+$$\Delta s = \frac{dx}{w}\ 9\ \text{GHz}$$
+
+Consequently we get:
+
+8.6e-08 GHz with error 1.0e-07. This error seems a bit large, perhaps this is due to a somewhat noisy signal.
