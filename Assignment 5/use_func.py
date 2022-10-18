@@ -21,3 +21,28 @@ def get_spectrum(pars, lmax = 3000):
     cmb = powers['total']
     tt = cmb[:, 0]    #you could return the full power spectrum here if you wanted to do say EE
     return tt[2:]
+
+# First we create a derivative taking function
+def p_deriv(func, p_ind, p):
+    shift = 1e-12
+    # Creating array
+    dp = np.zeros(len(p))
+    # Check if derivative index is an integer
+    if isinstance(p_ind, int):
+        dp[p_ind] = shift 
+    else:
+        raise ValueError("Derivative index must be an integer.")
+    return (func(p + dp) - func(p - dp))/(2*shift)    # Two sided derivative
+
+# Define numerical gradient taker
+def grad_f(f, p, length = None):
+    # Initializing the gradient
+    grad = np.zeros([2507, p.size])
+    # Finding the derivatives to build the gradient
+    if length == None:
+        for param in range(len(p)):
+            grad[:, param] = p_deriv(f, param, p)
+    else:
+        for param in range(len(p)):
+            grad[:, param] = p_deriv(f, param, p)[:length]
+    return grad

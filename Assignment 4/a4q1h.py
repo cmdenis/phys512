@@ -150,8 +150,8 @@ for i in tqdm(range(1, step_n)):
 
 
 # Printing values
-best_param = np.mean(chain[4000:-1, :], axis = 0)
-param_std = np.std(chain[4000:-1, :], axis = 0)
+best_param = np.mean(chain[10:-1, :], axis = 0)
+param_std = np.std(chain[10:-1, :], axis = 0)
 
 print("The best fit parameters are:", best_param[0:-1])
 print("Their error is:", param_std[0:-1])
