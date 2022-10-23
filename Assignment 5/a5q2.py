@@ -29,41 +29,7 @@ pred = get_spectrum(pars)[:data_l]
 old_chi = chi2(pred, spec, errs)
 print("Initial Chi^2:", old_chi)
 trunc = 0
-'''
-# We do the procedure until chi^2 condition is satisfied
-while looper:
-    
-    # Calculating predicted fit and gradient
-    grad = grad_f(get_spectrum, pars, length = data_l)
 
-    # Residuals
-    r = spec - pred
-
-    # Fragmenting linear algera stuff
-    lhs = grad.T@grad
-    rhs = grad.T@r 
-
-    # Applying a step
-    dp = np.linalg.inv(lhs)@rhs
-    pars = pars + dp
-
-    pred = get_spectrum(pars)[:data_l]
-    new_chi = chi2(pred, spec, errs)
-
-    # Check if if Chi^2 is minimized enough
-    if old_chi > new_chi:
-        if (old_chi - new_chi) < 0.01:
-            looper = False
-        else:
-            old_chi = new_chi
-    else:
-        print("\nChi square not minimized... Step made it bigger...\n")
-        looper = False
-    print("\nParameters:", pars, "\nDisplacement", dp)
-    print("Chi^2:", new_chi)
-'''
-
-'''Now the MCMC part'''
 
 print("\n Now MCMC part \n")
 
