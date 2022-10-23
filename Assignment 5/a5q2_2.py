@@ -29,15 +29,16 @@ errs = 0.5 * (planck[:,2] + planck[:,3])
 pars = np.asarray([69, 0.025, 0.12, 0.06, 2.10e-9, 0.95])
 
 def num_derivs(fun,pars,dp):
-    A=np.empty([data_l, len(pars)])
+    A=np.empty([3049, len(pars)])
     for i in range(len(pars)):
         pp=pars.copy()
         pp[i]=pars[i]+dp[i]
         y_right=fun(pp)
-        pp[i]=pars[i]#-dp[i]
+        
+        pp[i]=pars[i]-dp[i]
         y_left=fun(pp)
-        #A[:,i]=((y_right-y_left)/(2*dp[i]))[0:data_l]
-        A[:,i]=((y_right-y_left)/(dp[i]))[0:data_l]
+        
+        A[:,i]=((y_right-y_left)/2/dp[i])
     return A
 
 def num_newton(fun,pars,dp,x,y,sigma=1,niter=5):
@@ -47,15 +48,17 @@ def num_newton(fun,pars,dp,x,y,sigma=1,niter=5):
     for i in range(niter):
         pred=fun(pars)[0:data_l]
         r=y-pred
-        A=num_derivs(fun,pars,dp)
+        A=num_derivs(fun,pars,dp)[0:data_l]
+
+        
+
         lhs=A.T@inv_N@A
         rhs=A.T@inv_N@r
-        u, s, vh = np.linalg.svd(lhs)
-
-        inv_mat = vh.T@np.linalg.inv(np.diag(s))@u.T
-        step=inv_mat@rhs
-        #step=np.linalg.pinv(lhs)@rhs
+        step=np.linalg.inv(lhs)@rhs
+        
         pars=pars+step
+
+        
         chi2 =  np.sum(r**2/sigma**2)
         print(f"\nChi^2 = {chi2}")
         print(f"Chi^2 Diff = {chi2prev - chi2}")
@@ -73,9 +76,10 @@ def chisq(y, pred, err):
 
 fun = get_spectrum
 p0 = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
-pars, cov_mat = num_newton(fun, p0, pars*1e-8, x_data, y_data, errs, 3)
+pars, cov_mat = num_newton(fun, p0, pars*1e-8, x_data, y_data, errs, 2)
+print("Starting Params:", pars)
 
-print("\n Now MCMC part \n")
+print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 # Storing info from raw data
 ell = planck[:,0]
@@ -87,7 +91,7 @@ errs = 0.5 * (planck[:,2] + planck[:,3])
 #newton_res = np.asarray([6.89998762e+01, 2.20246320e-02, 1.20002275e-01, 5.99841862e-02, 1.58348123e-09, 9.49997838e-01])
 newton_res = pars
 
-step_n = 15000                                  # Number of steps to take
+step_n = 25000                                  # Number of steps to take
 
 p_init = newton_res                         # Initial Parameters
 

@@ -1,0 +1,179 @@
+import numpy as np 
+from scipy import integrate
+from matplotlib import pyplot as plt
+import camb
+from tqdm import tqdm
+from use_func import *
+import time
+import datetime
+import corner
+
+
+# Guess parameters:
+pars = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
+
+
+
+
+# Loading the data
+planck = np.loadtxt('COM_PowerSpect_CMB-TT-full_R3.01.txt', skiprows=1)
+#planck = np.loadtxt('COM_PowerSpect_CMB-TT-binned_R3.01.txt', skiprows=1)
+
+# Storing info from raw data
+x_data = planck[:,0]
+data_l = len(x_data)
+y_data = planck[:,1]
+errs = 0.5 * (planck[:,2] + planck[:,3])
+
+# Guess parameters:
+pars = np.asarray([69, 0.025, 0.12, 0.06, 2.10e-9, 0.95])
+
+def num_derivs(fun,pars,dp):
+    A=np.empty([3049, len(pars)])
+    for i in range(len(pars)):
+        pp=pars.copy()
+        pp[i]=pars[i]+dp[i]
+        y_right=fun(pp)
+        
+        pp[i]=pars[i]-dp[i]
+        y_left=fun(pp)
+        
+        A[:,i]=((y_right-y_left)/2/dp[i])
+    return A
+
+def num_newton(fun,pars,dp,x,y,sigma=1,niter=5):
+    chi2prev = 1E12
+    inv_N = np.eye(len(sigma))/sigma**2
+
+    for i in range(niter):
+        pred=fun(pars)[0:data_l]
+        r=y-pred
+        A=num_derivs(fun,pars,dp)[0:data_l]
+
+        
+
+        lhs=A.T@inv_N@A
+        rhs=A.T@inv_N@r
+        step=np.linalg.inv(lhs)@rhs
+        
+        pars=pars+step
+
+        
+        chi2 =  np.sum(r**2/sigma**2)
+        print(f"\nChi^2 = {chi2}")
+        print(f"Chi^2 Diff = {chi2prev - chi2}")
+        chi2prev = chi2
+        print("Parameters are:", pars)
+        print('Step is:', step)
+    print("Done Newton Method\n")
+    return pars,np.linalg.inv(lhs)
+
+
+def chisq(y, pred, err):
+    r=y-pred
+    return np.sum(r**2/err**2)
+
+
+fun = get_spectrum
+p0 = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
+print("Starting Newton Method...\n")
+pars, cov_mat = num_newton(fun, p0, pars*1e-8, x_data, y_data, errs, 1)
+
+
+# Storing info from raw data
+ell = planck[:,0]
+data_l = len(ell)
+spec = planck[:,1]
+errs = 0.5 * (planck[:,2] + planck[:,3])
+
+pred = get_spectrum(pars)[:data_l]
+cur_chi = chisq(pred, spec, errs)
+
+print("Starting Params:", pars, "with chi^2:", cur_chi)
+print("Covariance Matrix:", cov_mat)
+
+print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
+
+
+#newton_res = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
+#newton_res = np.asarray([6.89998762e+01, 2.20246320e-02, 1.20002275e-01, 5.99841862e-02, 1.58348123e-09, 9.49997838e-01])
+newton_res = pars
+
+step_n = 10000                                  # Number of steps to take
+
+p_init = newton_res                         # Initial Parameters
+
+
+#step_size = np.sqrt(np.diagonal(cov_mat))
+
+chain = np.zeros([step_n, len(p_init)+1])   # Initializing the chain
+chain[0, 0:-1] = p_init
+
+cur_pos = chain[0, 0:-1]
+
+#pred = get_spectrum(pars)[:data_l]
+#cur_chi = chi2(pred, spec, errs)
+
+chain[0, -1] = cur_chi
+
+#test = step_size*np.random.randn(len(step_size))
+#print(test)
+#print(chi2(chain[0, 0:-1]+test, t, d))
+
+file_name = str(datetime.datetime.now())
+
+#assert(0==1)
+for i in tqdm(range(1, step_n)):
+
+    # Finding new position
+    new_pos = chain[i-1, 0:-1] + np.random.multivariate_normal(np.zeros(len(np.diagonal(cov_mat))), cov_mat)*0.3
+
+    # Finding new chi square
+    pred = get_spectrum(new_pos)[:data_l]
+    new_chi = chisq(pred, spec, errs)
+
+    #print("The new Chi^2 is:", new_chi)
+    #print("The old Chi^2 is:", cur_chi)
+
+    if new_chi < cur_chi:
+        #print("Then we accept the change.")
+        accept = True
+    else:
+        delt = new_chi - cur_chi
+        #print("Then we don't immediately accept the change. Their difference is", delt)
+        
+        prob = np.exp(-0.5*delt)
+        if np.random.rand() < prob:
+            #print("Ended up going through...")
+            accept = True
+        else:
+            #print("Ended up NOT going through...")
+            accept = False
+    if accept:
+        cur_chi = new_chi
+        cur_pos = new_pos
+
+    chain[i, 0:-1] = cur_pos
+    chain[i, -1] = cur_chi
+
+    np.savetxt("runs/"+file_name+".txt", chain)
+
+# Printing values
+best_param = np.mean(chain[10:-1, :], axis = 0)
+param_std = np.std(chain[10:-1, :], axis = 0)
+
+print("The best fit parameters are:", best_param[0:-1])
+print("Their error is:", param_std[0:-1])
+
+# Plotting 
+plt.plot(chain[:, 0:-1], label = ["a", "t_0", "w", "b", "c", "dt"])
+plt.title("Parameters Trajectory in MCMC")
+plt.legend()
+plt.xlabel("MCMC Steps")
+plt.ylabel("Parameter Value")
+plt.savefig("figs/a5q2_mcmc_parameters.jpg")
+#plt.show()
+plt.clf()
+
+corner.corner(chain[:, 0:-1])
+plt.savefig("figs/a5q2_mcmc_corner.jpg")
