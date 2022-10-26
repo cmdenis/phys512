@@ -25,7 +25,7 @@ param_std = np.std(comp_dat[10:-1, :], axis = 0)
 print("The best fit parameters are:", best_param[0:-1])
 print("Their error is:", param_std[0:-1])
 
-plt.plot(comp_dat[:, 5])
+plt.plot(comp_dat[:, 1])
 plt.show()
 
 

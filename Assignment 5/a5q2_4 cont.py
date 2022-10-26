@@ -26,7 +26,11 @@ def chisq(y, pred, err):
     r=y-pred
     return np.sum(r**2/err**2)
 
-prev_file = os.listdir("runs")[-1]
+file_list = os.listdir("runs")
+file_list.sort()
+prev_file = file_list[-1]
+
+
 
 
 print("Loading Newton Method Covariance Matrix and last step of simulation...\n")
@@ -50,7 +54,7 @@ print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 
 
-step_n = 15000                                  # Number of steps to take
+step_n = 500                                  # Number of steps to take
 
 p_init = pars                         # Initial Parameters
 
