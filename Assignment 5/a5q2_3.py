@@ -9,64 +9,15 @@ import datetime
 import corner
 
 
-# Guess parameters:
-pars = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
-
-
-
 
 # Loading the data
-planck = np.loadtxt('COM_PowerSpect_CMB-TT-full_R3.01.txt', skiprows=1)
-#planck = np.loadtxt('COM_PowerSpect_CMB-TT-binned_R3.01.txt', skiprows=1)
+planck = np.loadtxt('COM_PowerSpect_CMB-TT-full_R3.01.txt', skiprows=1) # Importing raw data
+x_data = planck[:,0]    # X axis data
+y_data = planck[:,1]    # Y axis data
+errs = 0.5 * (planck[:,2] + planck[:,3])    # Errors on data
 
-# Storing info from raw data
-x_data = planck[:,0]
-data_l = len(x_data)
-y_data = planck[:,1]
-errs = 0.5 * (planck[:,2] + planck[:,3])
+data_l = len(x_data)    # Length of data
 
-# Guess parameters:
-pars = np.asarray([69, 0.025, 0.12, 0.06, 2.10e-9, 0.95])
-
-def num_derivs(fun,pars,dp):
-    A=np.empty([3049, len(pars)])
-    for i in range(len(pars)):
-        pp=pars.copy()
-        pp[i]=pars[i]+dp[i]
-        y_right=fun(pp)
-        
-        pp[i]=pars[i]-dp[i]
-        y_left=fun(pp)
-        
-        A[:,i]=((y_right-y_left)/2/dp[i])
-    return A
-
-def num_newton(fun,pars,dp,x,y,sigma=1,niter=5):
-    chi2prev = 1E12
-    inv_N = np.eye(len(sigma))/sigma**2
-
-    for i in range(niter):
-        pred=fun(pars)[0:data_l]
-        r=y-pred
-        A=num_derivs(fun,pars,dp)[0:data_l]
-
-        
-
-        lhs=A.T@inv_N@A
-        rhs=A.T@inv_N@r
-        step=np.linalg.inv(lhs)@rhs
-        
-        pars=pars+step
-
-        
-        chi2 =  np.sum(r**2/sigma**2)
-        print(f"\nChi^2 = {chi2}")
-        print(f"Chi^2 Diff = {chi2prev - chi2}")
-        chi2prev = chi2
-        print("Parameters are:", pars)
-        print('Step is:', step)
-    print("Done Newton Method\n")
-    return pars,np.linalg.inv(lhs)
 
 
 def chisq(y, pred, err):
@@ -74,11 +25,9 @@ def chisq(y, pred, err):
     return np.sum(r**2/err**2)
 
 
-fun = get_spectrum
-p0 = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
-print("Starting Newton Method...\n")
-pars, cov_mat = num_newton(fun, p0, pars*1e-8, x_data, y_data, errs, 1)
-
+print("Loading Newton Method Data...\n")
+pars = np.loadtxt("planck_fit_params.txt")
+cov_mat = np.loadtxt("planck_fit_cov.txt")
 
 # Storing info from raw data
 ell = planck[:,0]
@@ -95,16 +44,11 @@ print("Covariance Matrix:", cov_mat)
 print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 
-#newton_res = np.asarray([69, 0.022, 0.12, 0.06, 2.10e-9, 0.95])
-#newton_res = np.asarray([6.89998762e+01, 2.20246320e-02, 1.20002275e-01, 5.99841862e-02, 1.58348123e-09, 9.49997838e-01])
-newton_res = pars
 
-step_n = 10000                                  # Number of steps to take
+step_n = 25000                                  # Number of steps to take
 
-p_init = newton_res                         # Initial Parameters
+p_init = pars                         # Initial Parameters
 
-
-#step_size = np.sqrt(np.diagonal(cov_mat))
 
 chain = np.zeros([step_n, len(p_init)+1])   # Initializing the chain
 chain[0, 0:-1] = p_init
@@ -120,7 +64,7 @@ chain[0, -1] = cur_chi
 #print(test)
 #print(chi2(chain[0, 0:-1]+test, t, d))
 
-file_name = str(datetime.datetime.now())
+file_name = str(datetime.datetime.now()).replace("/", "-")
 
 #assert(0==1)
 for i in tqdm(range(1, step_n)):
@@ -155,6 +99,10 @@ for i in tqdm(range(1, step_n)):
 
     chain[i, 0:-1] = cur_pos
     chain[i, -1] = cur_chi
+
+    if np.mod(i, 100) == 0 :
+        corner.corner(chain[:, 0:-1])
+        plt.savefig("figs/"+file_name+"a5q2_mcmc_corner.jpg")
 
     np.savetxt("runs/"+file_name+".txt", chain)
 
