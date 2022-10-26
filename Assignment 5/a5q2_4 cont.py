@@ -54,7 +54,7 @@ print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 
 
-step_n = 500                                  # Number of steps to take
+step_n = 2500                                  # Number of steps to take
 
 p_init = pars                         # Initial Parameters
 
