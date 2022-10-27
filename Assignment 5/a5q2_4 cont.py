@@ -31,7 +31,7 @@ file_list.sort()
 prev_file = file_list[-1]
 
 
-
+#assert(0==1)
 
 print("Loading Newton Method Covariance Matrix and last step of simulation...\n")
 pars = np.loadtxt("runs/"+prev_file)[-1, 0:-1]
@@ -47,6 +47,9 @@ errs = 0.5 * (planck[:,2] + planck[:,3])
 pred = get_spectrum(pars)[:data_l]
 cur_chi = chisq(pred, spec, errs)
 
+print(cur_chi)
+
+
 print("Starting Params:", pars, "with chi^2:", cur_chi)
 print("Covariance Matrix:", cov_mat)
 
@@ -54,7 +57,7 @@ print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 
 
-step_n = 2500                                  # Number of steps to take
+step_n = 500                                  # Number of steps to take
 
 p_init = pars                         # Initial Parameters
 
