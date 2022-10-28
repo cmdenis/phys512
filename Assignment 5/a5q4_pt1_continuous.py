@@ -1,3 +1,4 @@
+from dataclasses import replace
 import numpy as np 
 from scipy import integrate
 from matplotlib import pyplot as plt
@@ -7,6 +8,7 @@ from use_func import *
 import time
 import datetime
 import corner
+import os
 
 
 
@@ -18,14 +20,23 @@ errs = 0.5 * (planck[:,2] + planck[:,3])    # Errors on data
 
 data_l = len(x_data)    # Length of data
 
+
+
 def mod_chisq(y, pred, err, tau_p):
     r = y - pred
     tau_chi = ((tau_p - 0.054) / 0.0074)**2
     return np.sum(r**2/err**2) + tau_chi
 
+file_list = os.listdir("runs4")
+file_list.sort()
+prev_file = file_list[-1]
 
-print("Loading Newton Method Data...\n")
-pars = np.loadtxt("planck_fit_params.txt")
+
+#assert(0==1)
+
+print("Loading Newton Method Covariance Matrix and last step of simulation...\n")
+pars = np.loadtxt("runs4/"+prev_file)[-1, 0:-1]
+print(pars)
 cov_mat = np.loadtxt("planck_fit_cov.txt")
 
 # Storing info from raw data
@@ -37,13 +48,17 @@ errs = 0.5 * (planck[:,2] + planck[:,3])
 pred = get_spectrum(pars)[:data_l]
 cur_chi = mod_chisq(pred, spec, errs, pars[3])
 
+print(cur_chi)
+
+
 print("Starting Params:", pars, "with chi^2:", cur_chi)
 print("Covariance Matrix:", cov_mat)
 
+print("\n Entering MCMC hyperspace. Wavefunction collapsing in progress... \n")
 
 
 
-step_n = 15000                                  # Number of steps to take
+step_n = 1000                                  # Number of steps to take
 
 p_init = pars                         # Initial Parameters
 
@@ -53,8 +68,14 @@ chain[0, 0:-1] = p_init
 
 cur_pos = chain[0, 0:-1]
 
+#pred = get_spectrum(pars)[:data_l]
+#cur_chi = chi2(pred, spec, errs)
 
 chain[0, -1] = cur_chi
+
+#test = step_size*np.random.randn(len(step_size))
+#print(test)
+#print(chi2(chain[0, 0:-1]+test, t, d))
 
 file_name = str(datetime.datetime.now()).replace("/", "-").replace(":", "-")
 
@@ -92,6 +113,9 @@ for i in tqdm(range(1, step_n)):
     chain[i, 0:-1] = cur_pos
     chain[i, -1] = cur_chi
 
+    #if np.mod(i, 100) == 0 :
+    #    corner.corner(chain[:, 0:-1])
+    #    plt.savefig("figs/"+file_name+"a5q2_mcmc_corner.jpg")
 
     np.savetxt("runs4/"+file_name+".txt", chain)
 
@@ -108,9 +132,9 @@ plt.title("Parameters Trajectory in MCMC")
 plt.legend()
 plt.xlabel("MCMC Steps")
 plt.ylabel("Parameter Value")
-plt.savefig("figs/a5q41_mcmc_parameters.jpg")
+plt.savefig("figs/a5q4_mcmc_parameters.jpg")
 #plt.show()
 plt.clf()
 
 corner.corner(chain[:, 0:-1])
-plt.savefig("figs/"+file_name+"a5q41_mcmc_corner.jpg")
+plt.savefig("figs/a5q4_mcmc_corner.jpg")
