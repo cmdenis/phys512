@@ -45,12 +45,26 @@ cur_chi = chisq(pred, y_data, errs)
 print("Optimized Chi^2 is:", cur_chi)
 
 
-#plt.plot(comp_dat[:, 0:-1])
-#plt.loglog(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)
-plt.plot(np.fft.fftshift(np.fft.irfft(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)))
-#plt.plot(np.fft.irfft(np.fft.fft(comp_dat[10000:, 1])**2))
-#plt.plot(np.fft.irfft(abs(np.fft.fft(nse))**2))
-plt.show()
+
+for i in range(len(best_param)):
+    plt.plot(comp_dat[:, i])
+    plt.title("Parameters over steps")
+    plt.xlabel("Steps")
+    plt.ylabel("Parameter value")
+    plt.savefig("figs/param"+str(i)+"run.jpg")
+    
+
+    plt.clf()
+    plt.loglog(np.abs(np.fft.rfft(comp_dat[:, i]))**2)
+    plt.title("Power Spectrum")
+    plt.xlabel("Frequency Space")
+    plt.ylabel("Intensity")
+    plt.savefig("figs/param"+str(i)+"power.jpg")
+    plt.show()
+    #plt.plot(np.fft.fftshift(np.fft.irfft(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)))
+    #plt.plot(np.fft.irfft(np.fft.fft(comp_dat[10000:, 1])**2))
+    #plt.plot(np.fft.irfft(abs(np.fft.fft(nse))**2))
+
 
 
 corner.corner(comp_dat[:, 0:-1])

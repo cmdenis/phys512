@@ -17,10 +17,9 @@ planck = np.loadtxt('COM_PowerSpect_CMB-TT-full_R3.01.txt', skiprows=1) # Import
 x_data = planck[:,0]    # X axis data
 y_data = planck[:,1]    # Y axis data
 errs = 0.5 * (planck[:,2] + planck[:,3])    # Errors on data
-
 data_l = len(x_data)    # Length of data
 
-# Finding the length of synthsized data
+# Finding the length of synthesized data
 sim_len = len(get_spectrum(pars))
 
 
@@ -29,9 +28,9 @@ def num_derivs(fun,pars,dp):
     A = np.empty([sim_len, len(pars)])  # Initializing the grad
     for i in range(len(pars)):
         pp = pars.copy()
-        pp[i] = pars[i]+dp[i]   # Parameters on right side
+        pp[i] = pars[i]+dp[i]   # Parameters on right side of derivative
         y_right = fun(pp)       # Right side of derivative
-        pp[i] = pars[i]-dp[i]   # Parameters on left side
+        pp[i] = pars[i]-dp[i]   # Parameters on left side of derivative
         y_left = fun(pp)        # Left side of derivative
         
         A[:,i]=((y_right-y_left)/2/dp[i])   # Computing rows of gradient
@@ -80,10 +79,12 @@ def chisq(y, pred, err):
 # Doing Newton Method
 fun = get_spectrum
 print("Starting Newton Method...\n")
-pars, cov_mat = num_newton(fun, pars, pars*1e-8, x_data, y_data, errs, 1)
+pars, cov_mat = num_newton(fun, pars, pars*1e-8, x_data, y_data, errs, 10)
 np.savetxt("planck_fit_params.txt", pars) # Storing params on cpu
 np.savetxt("planck_fit_cov.txt", cov_mat) # Storing errors on cpu
 
 print("The best fit parameters from Newton are:", pars)
 print("Their error is:", np.sqrt(np.diagonal(cov_mat)))
+chi = chisq(y_data, get_spectrum(pars)[:data_l], errs)
+print("CHI^2 is:", chi)
 
