@@ -20,7 +20,6 @@ for file in file_list:
 
 comp_dat = np.array(comp_dat)
 
-#assert(0==1)
 np.savetxt("runs4/compiled_runs.txt", comp_dat)
 
 # Printing values
@@ -45,14 +44,31 @@ cur_chi = chisq(pred, y_data, errs)
 print("Optimized Chi^2 is:", cur_chi)
 
 
-plt.plot(comp_dat[:, 0:-1])
-#plt.loglog(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)
-#plt.plot(np.fft.fftshift(np.fft.irfft(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)))
-#plt.plot(np.fft.irfft(np.fft.fft(comp_dat[10000:, 1])**2))
-#plt.plot(np.fft.irfft(abs(np.fft.fft(nse))**2))
+for i in range(len(best_param)):
+    plt.plot(comp_dat[:, i])
+    plt.title("Parameters over steps")
+    plt.xlabel("Steps")
+    plt.ylabel("Parameter value")
+    plt.savefig("figs/q4param"+str(i)+"run.jpg")
+    plt.clf()
+
+    plt.clf()
+    plt.loglog(np.abs(np.fft.rfft(comp_dat[:, i]))**2)
+    plt.title("Power Spectrum")
+    plt.xlabel("Frequency Space")
+    plt.ylabel("Intensity")
+    plt.savefig("figs/q4param"+str(i)+"power.jpg")
+    plt.clf()
+
+
+plt.clf()
+corner.corner(comp_dat[:, 0:-1])
+plt.savefig("figs/a5q3_mcmc_corner_compiled.jpg")
 plt.show()
 
+p_const = 6.62e-34
 
-corner.corner(comp_dat[:, 0:-1])
-plt.savefig("figs/a5q4_mcmc_corner_compiled.jpg")
-#plt.show()
+de_mean_val = 1 -  best_param[2]/p_const**2 - best_param[3]/p_const**2
+
+print("The mean value of dark energy is", de_mean_val)
+print("With uncertainty:", param_std[2]/p_const**2 + param_std[3]/p_const**2)

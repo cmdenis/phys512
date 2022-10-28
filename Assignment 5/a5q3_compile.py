@@ -8,7 +8,7 @@ from use_func import *
 file_list = os.listdir("runs3")
 file_list.sort()
 file_list.remove(".DS_Store")
-file_list.remove("compiled_runs.txt")
+file_list.remove("planck_chain.txt")
 
 
 comp_dat = []
@@ -18,17 +18,21 @@ for file in file_list:
     comp_dat += list(np.loadtxt("runs3/" + file))
 
 
+
 comp_dat = np.array(comp_dat)
 
-#assert(0==1)
-np.savetxt("runs3/compiled_runs.txt", comp_dat)
+# Putting chi^2 in first column
+comp_dat = np.roll(comp_dat, 1)
+
+
+np.savetxt("runs3/planck_chain.txt", comp_dat)
 
 # Printing values
 best_param = np.mean(comp_dat[5000:, :], axis = 0)
 param_std = np.std(comp_dat[5000:, :], axis = 0)
 
-print("The best fit parameters are:", best_param[0:-1])
-print("Their error is:", param_std[0:-1])
+print("The best fit parameters are:", best_param[1:])
+print("Their error is:", param_std[1:])
 
 # Calculating optimized Chi^2
 def chisq(y, pred, err):
@@ -40,14 +44,14 @@ x_data = planck[:,0]    # X axis data
 y_data = planck[:,1]    # Y axis data
 errs = 0.5 * (planck[:,2] + planck[:,3])    # Errors on data
 data_l = len(x_data)    # Length of data
-pred = get_spectrum(best_param)[:data_l]
+pred = get_spectrum(best_param[1:])[:data_l]
 cur_chi = chisq(pred, y_data, errs)
 print("Optimized Chi^2 is:", cur_chi)
 
 
 
-for i in range(len(best_param)):
-    plt.plot(comp_dat[:, i])
+for i in range(len(best_param)-1):
+    plt.plot(comp_dat[:, i+1])
     plt.title("Parameters over steps")
     plt.xlabel("Steps")
     plt.ylabel("Parameter value")
@@ -60,13 +64,17 @@ for i in range(len(best_param)):
     plt.xlabel("Frequency Space")
     plt.ylabel("Intensity")
     plt.savefig("figs/param"+str(i)+"power.jpg")
-    plt.show()
-    #plt.plot(np.fft.fftshift(np.fft.irfft(np.abs(np.fft.rfft(comp_dat[:, 0]))**2)))
-    #plt.plot(np.fft.irfft(np.fft.fft(comp_dat[10000:, 1])**2))
-    #plt.plot(np.fft.irfft(abs(np.fft.fft(nse))**2))
+    plt.clf()
 
 
-
+plt.clf()
 corner.corner(comp_dat[:, 0:-1])
 plt.savefig("figs/a5q3_mcmc_corner_compiled.jpg")
 #plt.show()
+
+p_const = 6.62e-34
+
+de_mean_val = 1 -  best_param[2]/p_const**2 - best_param[3]/p_const**2
+
+print("The mean value of dark energy is", de_mean_val)
+print("With uncertainty:", param_std[2]/p_const**2 + param_std[3]/p_const**2)
