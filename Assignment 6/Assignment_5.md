@@ -19,4 +19,8 @@ def convo_shift(x, shift):
 
 The function works by creating an array of the same length as the input array, then adds the dirac's peak at a position shifted from the center by the inputted amount. Then these two arrays are convolved with each other and returned.
 
+We can see this in action, by shifting a gaussian, by 200 in the following:
+
+![param2power](figs/a6q1_convo.jpg)
+
 ## Question 2
