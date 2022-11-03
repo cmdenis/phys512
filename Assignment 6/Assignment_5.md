@@ -1,6 +1,6 @@
 # Assignment 6
 
-# Question 1
+## Question 1
 
 We can use a Dirac function with a convolution to shift a signal around. More precisely, we know that
 
@@ -19,4 +19,4 @@ def convo_shift(x, shift):
 
 The function works by creating an array of the same length as the input array, then adds the dirac's peak at a position shifted from the center by the inputted amount. Then these two arrays are convolved with each other and returned.
 
-# Question 2
+## Question 2
