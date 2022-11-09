@@ -53,4 +53,31 @@ We can see the shifted Gaussian and the unchanged Fourier space function (up to 
 
 ## Question 3
 
+## Question 4
+
+### Part a)
+
+We know that for geometric series we have:
+
+$$ 
+\sum_{k=0}^{n-1} a x^k = \begin{cases}
+a \left(\frac{1 - x^n}{1-x}\right)n
+,\\
+x(n-1)\\
+x(n-1)
+\end{cases}
+$$
+
+In our case we have the sum:
+
+$$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right)$$
+
+Consequently, reading off the terms in the equation we can substitute in the result from the geometric series:
+
+$$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right) = \sum_{k=0}^{N-1}  \exp\left(-\frac{2\pi i k}{N}\right)^x = \left(\frac{1 - \exp\left(-\frac{2\pi i k}{N}\right)^{N}}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)$$
+
+$$= \left(\frac{1 - \exp\left(-2\pi i k\right)}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)$$
+
+### Part b)
+
 
