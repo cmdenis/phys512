@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import h5py
 import glob
+import json
 
 
 
@@ -58,12 +59,29 @@ x=np.linspace(-np.pi/2,np.pi/2,len(strain))
 win=np.cos(x)
 
 noise_ft=np.fft.fft(win*strain)
-noise_smooth=smooth_vector(np.abs(noise_ft)**2,10)
-noise_smooth=noise_smooth[:len(noise_ft)//2+1] #will give us same length
+print(len(noise_ft))
+
+plt.loglog(np.abs(noise_ft)**2)
 
 
+noise_smooth=smooth_vector(np.abs(noise_ft)**2,20)
+#noise_smooth=noise_smooth[:len(noise_ft)//2+1] #will give us same length
+w_data = noise_ft/noise_smooth
+plt.loglog(noise_smooth)
+
+plt.loglog(np.abs(noise_ft/noise_smooth)**2)
+
+plt.show()
+
+# Match filtering
+template_ft=np.fft.fft(tp*win)
+rhs=np.fft.irfft(w_data*np.conj(template_ft))
+
+plt.plot(rhs)
+plt.show()
 
 
+assert(0==1)
 tobs=dt*len(strain)
 dnu=1/tobs
 nu=np.arange(len(noise_smooth))*dnu
@@ -72,10 +90,12 @@ nu[0]=0.5*nu[1]
 Ninv=1/noise_smooth
 Ninv[nu>1500]=0
 Ninv[nu<20]=0
+print(len(np.fft.rfft(strain)))
 
 template_ft=np.fft.rfft(tp*win)
 template_filt=template_ft*Ninv
 data_ft=np.fft.rfft(strain*win)
+print(len(data_ft))
 rhs=np.fft.irfft(data_ft*np.conj(template_filt))
 
 plt.plot(rhs)
