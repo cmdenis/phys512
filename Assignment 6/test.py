@@ -47,12 +47,12 @@ def read_file(filename):
 
 #fnames=glob.glob("[HL]-*.hdf5")
 #fname=fnames[0]
-fname='LIGO/H-H1_LOSC_4_V2-1126259446-32.hdf5'
+fname='LIGO/H-H1_LOSC_4_V2-1128678884-32.hdf5'
 print('reading file ',fname)
 strain,dt,utc=read_file(fname)
 
 #th,tl=read_template('GW150914_4_template.hdf5')
-template_name='LIGO/GW150914_4_template.hdf5'
+template_name='LIGO/LVT151012_4_template.hdf5'
 tp,tx=read_template(template_name)
 
 x=np.linspace(-np.pi/2,np.pi/2,len(strain))

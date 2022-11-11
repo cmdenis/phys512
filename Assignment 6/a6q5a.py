@@ -62,7 +62,7 @@ def getnobel(fname, tmp_name = 'LIGO/GW150914_4_template.hdf5'):
 
     # Smoothing our data to create weights
     noise_smooth=smooth_vector(np.abs(noise_ft)**2, 10)
-    noise_smooth=noise_smooth[:len(noise_ft)//2+1] #will give us same length
+    noise_smooth=noise_smooth[:len(noise_ft)//2+1] # will give us same length
     tobs=dt*len(strain)
     dnu=1/tobs
     nu=np.arange(len(noise_smooth))*dnu
