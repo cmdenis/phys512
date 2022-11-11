@@ -5,7 +5,6 @@ import glob
 import json
 
 
-
 def smooth_vector(vec,sig):
     n=len(vec)
     x=np.arange(n)
@@ -16,7 +15,6 @@ def smooth_vector(vec,sig):
     kernelft=np.fft.rfft(kernel)
     vec_smooth=np.fft.irfft(vecft*kernelft) #convolve the data with the kernel
     return vec_smooth
-
 def read_template(filename):
     dataFile=h5py.File(filename,'r')
     template=dataFile['template']
@@ -45,47 +43,88 @@ def read_file(filename):
 
 
 
-#fnames=glob.glob("[HL]-*.hdf5")
-#fname=fnames[0]
-fname='LIGO/H-H1_LOSC_4_V2-1128678884-32.hdf5'
-print('reading file ',fname)
-strain,dt,utc=read_file(fname)
+def getlocation(ename):
 
-#th,tl=read_template('GW150914_4_template.hdf5')
-template_name='LIGO/LVT151012_4_template.hdf5'
-tp,tx=read_template(template_name)
+    print("Looking at event", ename)
 
-x=np.linspace(-np.pi/2,np.pi/2,len(strain))
-win=np.cos(x)
+    # Opening JSON file to map and getting info
+    with open("LIGO/BBH_events_v3.json") as f:
+        events = f.read()
 
-noise_ft=np.fft.fft(win*strain)
-print(len(noise_ft))
+    events = json.loads(events)
+    event = events[ename]
 
-plt.loglog(np.abs(noise_ft)**2)
+        
+    tmp_name = "LIGO/" + event["fn_template"]
+    fname_h = "LIGO/" + event["fn_H1"]
+    fname_l = "LIGO/" + event["fn_L1"]
+    fname_list = [fname_h, fname_l]
+
+    locations = []
+
+    for fname in fname_list:
+        # Loading the data
+        print('reading file ',fname)
+        strain,dt,utc=read_file(fname)
+
+        # Loading the template
+        template_name='LIGO/LVT151012_4_template.hdf5'
+        tp,tx=read_template(template_name)
+        
+
+        # Generating the cosine window
+        x=np.linspace(-np.pi/2,np.pi/2,len(strain))
+        win=np.cos(x)
+
+        # Taking the fft of the data
+        noise_ft=np.fft.fft(win*strain)
+
+        
+
+        # Creating a smooth version of the spectrum
+        noise_smooth=smooth_vector(np.abs(noise_ft)**2,20)
+
+        # Whitened data
+        w_data = noise_ft/noise_smooth
+
+        # Generating the axis
+        tobs=dt*len(strain)
+        dnu=1/tobs
+        nu=np.arange(len(noise_smooth))*dnu
+        nu[0]=0.5*nu[1]
+        
+
+        # Plotting
+        #plt.loglog(nu, np.abs(noise_ft)**2)
+        #plt.loglog(nu, noise_smooth)
+        #plt.loglog(nu, np.abs(w_data)**2)
+        #plt.show()
+
+        # Match filtering
+        template_ft=np.fft.fft(tp*win)
+        rhs=np.fft.irfft(w_data*np.conj(template_ft))
+        times = np.arange(len(rhs))*dt/2
+
+        # Plotting
+        plt.plot(times, rhs)
+        plt.xlabel("Time (s)")
+        plt.ylabel("m")
+        plt.savefig("figs/a6q5_example_location.jpg")
+        plt.show()
+
+        locations.append(times[np.argmax(np.abs(rhs))])
 
 
-noise_smooth=smooth_vector(np.abs(noise_ft)**2,20)
-#noise_smooth=noise_smooth[:len(noise_ft)//2+1] #will give us same length
-w_data = noise_ft/noise_smooth
-plt.loglog(noise_smooth)
+    return locations
 
-plt.loglog(np.abs(noise_ft/noise_smooth)**2)
+event_list = ['GW150914', "LVT151012", "GW151226", "GW170104"]
 
-plt.show()
-
-# Match filtering
-template_ft=np.fft.fft(tp*win)
-rhs=np.fft.irfft(w_data*np.conj(template_ft))
-
-plt.plot(rhs)
-plt.show()
+for event in event_list:    
+    print(getlocation(event))
 
 
 assert(0==1)
-tobs=dt*len(strain)
-dnu=1/tobs
-nu=np.arange(len(noise_smooth))*dnu
-nu[0]=0.5*nu[1]
+
 
 Ninv=1/noise_smooth
 Ninv[nu>1500]=0

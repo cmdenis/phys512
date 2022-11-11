@@ -90,7 +90,7 @@ To model the noise we smooth out the data using a convolution with a fat gaussia
 
 The orange curve is the smoothed data in Fourier space and the blue curve is the raw data in Fourier space. The raw time-domain data was put in Fourier space using a cosine windowing to prevent artefact in the frequency domain. After playing with this and being able to find a peak for the GW event, I didn't find useful to use an alternate windowing scheme. Maybe there was some noise reduction in some of the options I tried, but I did not notice anything significant, hence I decided to only use the cosine window.
 
-Using this smoothed out curve, we can now whiten the data. Intuitively, we want to flatten out to frequency response to make it closer to white noise. To do this, we can simply divide the raw Fourier spectrum by the smoothed out version. This does indeed flatten out our spectrum as shown in the following plot:
+Using this smoothed out curve, we can now whiten the data. Intuitively, we want to flatten out to frequency response to make it closer to white noise. To do this, we can simply divide the raw Fourier spectrum by the smoothed out version. We could have used a simple curve to do this, but I didn't think it would be worth it since we already have a relatively smooth result, which is adaptive. It means less manual tweaking of parameters in our curve or trying to curve fit to the data. The method used does indeed flatten/whiten out our spectrum as shown in the following plot:
 
 ![a6q5_comp_smooth_ps](figs/a6q5_whitened_ps.jpg)
 
