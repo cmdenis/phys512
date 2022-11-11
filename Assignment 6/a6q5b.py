@@ -6,14 +6,14 @@ import json
 
 
 def smooth_vector(vec,sig):
-    n=len(vec)
-    x=np.arange(n)
-    x[n//2:]=x[n//2:]-n
-    kernel=np.exp(-0.5*x**2/sig**2) # make a Gaussian kernel
-    kernel=kernel/kernel.sum()
-    vecft=np.fft.rfft(vec)
-    kernelft=np.fft.rfft(kernel)
-    vec_smooth=np.fft.irfft(vecft*kernelft) #convolve the data with the kernel
+    n = len(vec)                               
+    x = np.arange(n)                          
+    x[n//2:] = x[n//2:]-n                       # Axis
+    kernel = np.exp(-0.5*x**2/sig**2)           # Gaussian to convolve
+    kernel = kernel/kernel.sum()                # Normalize Gaussian
+    vecft = np.fft.rfft(vec)                    # FFT of array
+    kernelft = np.fft.rfft(kernel)              # FFT of gaussian
+    vec_smooth = np.fft.irfft(vecft*kernelft)   # convolve the data with the kernel
     return vec_smooth
 def read_template(filename):
     dataFile=h5py.File(filename,'r')
@@ -25,16 +25,10 @@ def read_file(filename):
     dataFile=h5py.File(filename,'r')
     dqInfo = dataFile['quality']['simple']
     qmask=dqInfo['DQmask'][...]
-
     meta=dataFile['meta']
-    #gpsStart=meta['GPSstart'].value
     gpsStart=meta['GPSstart'][()]
-    #print meta.keys()
-    #utc=meta['UTCstart'].value
     utc=meta['UTCstart'][()]
-    #duration=meta['Duration'].value
     duration=meta['Duration'][()]
-    #strain=dataFile['strain']['Strain'].value
     strain=dataFile['strain']['Strain'][()]
     dt=(1.0*duration)/len(strain)
 
@@ -93,13 +87,17 @@ def getlocation(ename):
         nu[0]=0.5*nu[1]
 
         w_data[nu < 10] = 0
-        w_data[nu > 800] = 0
+        w_data[nu > 1000] = 0
         
 
         # Plotting
-        plt.loglog(nu, np.abs(noise_ft)**2)
-        plt.loglog(nu, noise_smooth)
-        plt.loglog(nu, np.abs(w_data)**2)
+        plt.loglog(nu, np.abs(noise_ft)**2, label = "Raw Data")
+        plt.loglog(nu, noise_smooth, label = "Smoothened Raw Data")
+        plt.loglog(nu, np.abs(w_data)**2, label = "Whitened And Filtered Data")
+        plt.xlabel("Frequency")
+        plt.ylabel("Amplitude")
+        plt.legend()
+        plt.savefig("figs/a6q5b_example_spectrum.jpg")
         plt.show()
 
         # Match filtering
@@ -120,6 +118,7 @@ def getlocation(ename):
 event_list = ['GW150914', "LVT151012", "GW151226", "GW170104"]
 
 for event in event_list:    
+    print()
     times = getlocation(event)
     print("Time of events at both detectors:", times)
     print("Difference in time", np.abs(times[1] - times[0]))
