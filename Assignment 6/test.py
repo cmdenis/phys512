@@ -9,7 +9,7 @@ def smooth_vector(vec,sig):
     n=len(vec)
     x=np.arange(n)
     x[n//2:]=x[n//2:]-n
-    kernel=np.exp(-0.5*x**2/sig**2) #make a Gaussian kernel
+    kernel=np.exp(-0.5*x**2/sig**2) # make a Gaussian kernel
     kernel=kernel/kernel.sum()
     vecft=np.fft.rfft(vec)
     kernelft=np.fft.rfft(kernel)
@@ -64,14 +64,13 @@ def getlocation(ename):
 
     for fname in fname_list:
         # Loading the data
-        print('reading file ',fname)
+        print('Reading File:',fname)
         strain,dt,utc=read_file(fname)
 
         # Loading the template
-        template_name='LIGO/LVT151012_4_template.hdf5'
-        tp,tx=read_template(template_name)
+        print("Using template:", tmp_name)
+        tp,tx=read_template(tmp_name)
         
-
         # Generating the cosine window
         x=np.linspace(-np.pi/2,np.pi/2,len(strain))
         win=np.cos(x)
@@ -82,7 +81,7 @@ def getlocation(ename):
         
 
         # Creating a smooth version of the spectrum
-        noise_smooth=smooth_vector(np.abs(noise_ft)**2,20)
+        noise_smooth=smooth_vector(np.abs(noise_ft)**2, 20)
 
         # Whitened data
         w_data = noise_ft/noise_smooth
@@ -92,13 +91,16 @@ def getlocation(ename):
         dnu=1/tobs
         nu=np.arange(len(noise_smooth))*dnu
         nu[0]=0.5*nu[1]
+
+        w_data[nu < 10] = 0
+        w_data[nu > 800] = 0
         
 
         # Plotting
-        #plt.loglog(nu, np.abs(noise_ft)**2)
-        #plt.loglog(nu, noise_smooth)
-        #plt.loglog(nu, np.abs(w_data)**2)
-        #plt.show()
+        plt.loglog(nu, np.abs(noise_ft)**2)
+        plt.loglog(nu, noise_smooth)
+        plt.loglog(nu, np.abs(w_data)**2)
+        plt.show()
 
         # Match filtering
         template_ft=np.fft.fft(tp*win)
@@ -120,7 +122,9 @@ def getlocation(ename):
 event_list = ['GW150914', "LVT151012", "GW151226", "GW170104"]
 
 for event in event_list:    
-    print(getlocation(event))
+    times = getlocation(event)
+    print("Time of events at both detectors:", times)
+    print("Difference in time", np.abs(times[1] - times[0]))
 
 
 assert(0==1)
