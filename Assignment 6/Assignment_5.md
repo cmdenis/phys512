@@ -80,4 +80,8 @@ $$= \left(\frac{1 - \exp\left(-2\pi i k\right)}{1-\exp\left(-\frac{2\pi i k}{N}\
 
 ### Part b)
 
+## Question 5
 
+### Part a)
+
+To model the noise we smooth out the data using a convolution with a fat gaussian. This basically averages out neighboring points. We can see this effect in the following picture:
