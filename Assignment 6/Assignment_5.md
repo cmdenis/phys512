@@ -27,7 +27,7 @@ We can see this in action, by shifting a gaussian, by 200 in the following:
 
 ### Part a)
 
-We can apply the given theorem to create a convolution using fourier space. This is done using the following code:
+We can apply the given theorem to create a correlation using fourier space. This is done using the following code:
 
 ```python
 def cor_func(a, b, shift = False):
@@ -37,7 +37,7 @@ def cor_func(a, b, shift = False):
         return np.fft.fftshift(np.fft.ifft(np.fft.fft(a) * np.conjugate(np.fft.fft(b))))
 ```
 
-This code simply takes the discrete FFTs and IFFTs of the arrays `a` and `b` and outputs the resulting convolution. We added an extra argument to allow to use the `fftshift` method so as to recenter the peak. We can see in the following figure that we obtain a Gaussian in our Fourier space:
+This code simply takes the discrete FFTs and IFFTs of the arrays `a` and `b` and outputs the resulting correlation. We added an extra argument to allow to use the `fftshift` method so as to recenter the peak. We can see in the following figure that we obtain a Gaussian in our Fourier space:
 
 ![a6q2_a_gauss_cor](figs/a6q2_a_gauss_cor.jpg)
 
@@ -52,6 +52,22 @@ When shifting the Gaussian, the fourier space result ends up looking the same (u
 We can see the shifted Gaussian and the unchanged Fourier space function (up to a phase). This is because, in fourier space, the math basically "wraps" the array around.
 
 ## Question 3
+
+To bypass the wrap-around nature of the FFT, we can define/add zeroes to the end of our arrays/data. A code like this works:
+
+```python
+def convo(a, b):
+    # Adding zeros to the end
+    nb_zer = len(a)
+    zers = np.zeros(nb_zer)
+    a_zer = np.concatenate([a, zers])
+    b_zer = np.concatenate([b, zers])
+
+    # Taking the rFFT and then converting back into position space
+    return np.fft.irfft(np.fft.rfft(a_zer) * np.conjugate(np.fft.rfft(b_zer)))[:nb_zer]
+```
+
+When doing a convolution in Fourier space, we can think of it as having two rings each containing the elements of our arrays and putting the two rings side by side. We then multiply every element on a ring by the paired one on the other and add all of these products. We then shift one ring by one index relative to the other and repeat. The summation of all the products for all the possible rotations of the ring will create the convolution array. The problem with this is that there is no "end" to the ring and it keeps being matched with other values. What we can do to fix this is simply add as many zeros as there are elements in the arrays to the rings and then remove that same amount to the final array. This will make sure that there is no "cross-talk" between the rear elements of the first array with the front elements of the second array. Sorry for the wordiness, hopefully the code is clearer than my explanation lol
 
 ## Question 4
 
@@ -107,9 +123,15 @@ on top and some value $\neq 0$ on the bottom. Hence we get
 
 $$\left(\frac{1 - \exp\left(-\frac{2\pi i k}{N}\right)^{N}}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right) = \left(\frac{0}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)=0$$
 
-$$☺$$
+$$:)$$
 
 ### Part c)
+
+We can plot the analytical spectrum for the FFT of a sine wave with a non-integer frequency, in this case 10.4. In the following plot, we plot both the numerical and analytical results:
+
+![a6q4d_ana_vs_num](figs/a6q4d_ana_vs_num.jpg)
+
+We clearly see that the numerical result features some "spectral leaking" on the side of its peaks.
 
 ### Part d)
 
