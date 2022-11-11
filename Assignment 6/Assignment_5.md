@@ -84,7 +84,22 @@ $$= \left(\frac{1 - \exp\left(-2\pi i k\right)}{1-\exp\left(-\frac{2\pi i k}{N}\
 
 ### Part a)
 
-To model the noise we smooth out the data using a convolution with a fat gaussian. This basically averages out neighboring points. We can see this effect in the following picture:
+To model the noise we smooth out the data using a convolution with a fat gaussian. This basically averages out neighboring points. Practically this is done using Jon's code:
+
+```python
+def smooth_vector(vec,sig):
+    n = len(vec)                               
+    x = np.arange(n)                          
+    x[n//2:] = x[n//2:]-n                       # Axis
+    kernel = np.exp(-0.5*x**2/sig**2)           # Gaussian to convolve
+    kernel = kernel/kernel.sum()                # Normalize Gaussian
+    vecft = np.fft.rfft(vec)                    # FFT of array
+    kernelft = np.fft.rfft(kernel)              # FFT of gaussian
+    vec_smooth = np.fft.irfft(vecft*kernelft)   # convolve the data with the kernel
+    return vec_smooth
+```
+
+ We can see this effect in the following picture:
 
 ![a6q5_comp_smooth_ps](figs/a5q6_comp_smooth_ps.jpg)
 
@@ -94,7 +109,27 @@ Using this smoothed out curve, we can now whiten the data. Intuitively, we want 
 
 ![a6q5_comp_smooth_ps](figs/a6q5_whitened_ps.jpg)
 
-We indeed see the power spectrum being flattened, except possibly for the very begining. This is not really a problem since that range (on a log scale) does not represent many points in comparison to the rest of the points and also it is not in the range where our sought-after signal exists.
+We indeed see the power spectrum being flattened, except possibly for the very begining. This is not really a problem since that range (on a log scale) does not represent many points in comparison to the rest of the points and also it is not in the range where our sought-after signal exists. We will actually filter out a portion of the spectrum. In the JSON data, we see that all of our events exist in between 10 and 1000 Hz. Hence, we will look only at frequencies within this range.
 
 ### Part b) 
+
+For this part we essentially loop over the different events and read off the JSON data what is the associated files for
+
+1. The Livingston detector
+2. The Hanford detector
+3. The template file
+
+Using these, we then proceed, as described previously to filter the data by applying a band pass in the region of 10 to 1000 Hz, we also whiten the data by dividing the raw signals spectrum by a smoothened version of the same spectrum. This is shown in the following plot:
+
+![a6q5b_example_spectrum](figs/a6q5b_example_spectrum.jpg)
+
+With this, we can now apply a match filtering with our template in Fourier space. Converting back to the time domain, we obtain plots like the following for each detector:
+
+![a6q5_example_location](figs/a6q5_example_location.jpg)
+
+We see a peak closeby to the 0 s mark.
+
+### Part c)
+
+
 
