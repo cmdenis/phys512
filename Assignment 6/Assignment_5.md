@@ -62,9 +62,8 @@ We know that for geometric series we have:
 $$ 
 \sum_{k=0}^{n-1} a x^k = \begin{cases}
 a \left(\frac{1 - x^n}{1-x}\right)n
-,\\
-x(n-1)\\
-x(n-1)
+, \ x\neq1\\
+an, \ x = 1
 \end{cases}
 $$
 
@@ -72,13 +71,67 @@ In our case we have the sum:
 
 $$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right)$$
 
-Consequently, reading off the terms in the equation we can substitute in the result from the geometric series:
+Consequently, reading off the terms in the equation we can substitute in the result from the geometric series. :
 
 $$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right) = \sum_{k=0}^{N-1}  \exp\left(-\frac{2\pi i k}{N}\right)^x = \left(\frac{1 - \exp\left(-\frac{2\pi i k}{N}\right)^{N}}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)$$
 
 $$= \left(\frac{1 - \exp\left(-2\pi i k\right)}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)$$
 
+This holds for
+
+$$ \exp\left(-\frac{2\pi ik }{N}\right) \neq 1$$
+
+and when
+
+$$ \exp\left(-\frac{2\pi ik }{N}\right) = 1$$
+
+we have
+
+$$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right) = N$$
+
 ### Part b)
+
+Using the previous result, we see that when $k\to 0$, we have
+
+$$ \exp\left(-\frac{2\pi ik }{N}\right) = 1$$
+
+hence, we have 
+
+$$\sum_{x=0}^{N-1}\exp\left(-\frac{2\pi ik x}{N}\right) = N.$$
+
+Furthermore, if we have an integer k that is not a multiple of N, then we have 
+
+$$\exp\left(-2\pi i k\right)=1$$
+
+on top and some value $\neq 0$ on the bottom. Hence we get
+
+$$\left(\frac{1 - \exp\left(-\frac{2\pi i k}{N}\right)^{N}}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right) = \left(\frac{0}{1-\exp\left(-\frac{2\pi i k}{N}\right)}\right)=0$$
+
+$$☺$$
+
+### Part c)
+
+### Part d)
+
+For this part we use the given cosine windowing function. We simply multiply the time data by it and then look at its fourier spectrum. We get the following
+
+![a6q4d_ft_window_comp](figs/a6q4d_ft_window_comp.jpg)
+
+Indeed we see that the spectral leakage drops dramtically for the windowd function.
+
+### Part e)
+
+If we take the Fourier transform of the cosine window, we obtain the following:
+
+![a6q4e_ft_window](figs/a6q4e_ft_window.jpg)
+
+If we print out the result we can see that this is indeed an array of the form $[N/2, -N/4, 0, .., 0, -N/4]$. We should point out that actually in this case, the 0s are in fact small values, but not 0.
+
+Now this means that if we do the convolution of the spectrum with this coupling amongst neighbors we can obtain the windowing, while only working in Fourier space. If we do this and compare with our previous results using a multiplication with a window function, we get:
+
+![a6q4e_ft_window_comp](figs/a6q4e_ft_window_comp.jpg)
+
+We see that indeed, this convolution does produce the same results as the windowing. The small differences are most likely due to the fact that we used exactly 0s in the convolution, but should've used something a bit bigger than 0.
 
 ## Question 5
 
@@ -127,9 +180,62 @@ With this, we can now apply a match filtering with our template in Fourier space
 
 ![a6q5_example_location](figs/a6q5_example_location.jpg)
 
-We see a peak closeby to the 0 s mark.
+We see a peak closeby to the 0 s mark. The found position of the peaks for each events are:
+
+```output
+GW150914: 
+    Hanford: 0.4404296875
+    Livingston: 0.43310546875
+
+LVT151012:
+    Hanford: 0.44140625
+    Livingston: 0.4417724609375
+
+GW151226
+    Hanford: 0.647705078125
+    Livingston: 0.646484375
+
+GW170104
+    Hanford: 0.60791015625
+    Livingston: 0.6109619140625
+```
+
 
 ### Part c)
 
+We can find the SNR using the following formula:
 
+$$\text{SNR} = \frac{\text{max}(x^2)}{\text{mean}(x^2)}$$
+
+and we use what I found online to be called "Equal Gain Combining" to combine SNR of two signals. This is defined as
+
+$$\text{SNR}_{\text{tot}} = \frac{1}{2}\left(\text{SNR}_{\text{1}}^{1/2} + \text{SNR}_{\text{2}}^{1/2} \right)^2$$
+
+For each event we then get:
+
+```output
+GW150914: 
+    Hanford: 7.31552905495105
+    Livingston: 12.34747389416139
+    Combined: 19.33562184563671
+
+LVT151012:
+    Hanford: 35.959162405388376
+    Livingston: 37.79704234863802
+    Combined: 73.74475376085898
+
+GW151226
+    Hanford: 142.4517221517886
+    Livingston: 281.1151785130941
+    Combined: 411.89677148372743
+
+GW170104
+    Hanford: 41.19736083269106
+    Livingston: 21.691491618581157
+    Combined: 61.3381079528838
+```
+
+We seem to get pretty decent SNRs for some of the events, others are not as good. An interesting remark is that the Livingston detector consistently has larger SNR than Hanford. I'm not familiar with the surroundings of Hanford, but it makes sense that if one station has the same noisy characteristics, then they are preserved accross the events.
+
+### Part d)
 
