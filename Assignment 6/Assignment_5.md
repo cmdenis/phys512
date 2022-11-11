@@ -85,3 +85,16 @@ $$= \left(\frac{1 - \exp\left(-2\pi i k\right)}{1-\exp\left(-\frac{2\pi i k}{N}\
 ### Part a)
 
 To model the noise we smooth out the data using a convolution with a fat gaussian. This basically averages out neighboring points. We can see this effect in the following picture:
+
+![a6q5_comp_smooth_ps](figs/a5q6_comp_smooth_ps.jpg)
+
+The orange curve is the smoothed data in Fourier space and the blue curve is the raw data in Fourier space. The raw time-domain data was put in Fourier space using a cosine windowing to prevent artefact in the frequency domain. After playing with this and being able to find a peak for the GW event, I didn't find useful to use an alternate windowing scheme. Maybe there was some noise reduction in some of the options I tried, but I did not notice anything significant, hence I decided to only use the cosine window.
+
+Using this smoothed out curve, we can now whiten the data. Intuitively, we want to flatten out to frequency response to make it closer to white noise. To do this, we can simply divide the raw Fourier spectrum by the smoothed out version. This does indeed flatten out our spectrum as shown in the following plot:
+
+![a6q5_comp_smooth_ps](figs/a6q5_whitened_ps.jpg)
+
+We indeed see the power spectrum being flattened, except possibly for the very begining. This is not really a problem since that range (on a log scale) does not represent many points in comparison to the rest of the points and also it is not in the range where our sought-after signal exists.
+
+### Part b) 
+

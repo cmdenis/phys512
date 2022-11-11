@@ -27,14 +27,9 @@ def read_file(filename):
     qmask=dqInfo['DQmask'][...]
 
     meta=dataFile['meta']
-    #gpsStart=meta['GPSstart'].value
     gpsStart=meta['GPSstart'][()]
-    #print meta.keys()
-    #utc=meta['UTCstart'].value
     utc=meta['UTCstart'][()]
-    #duration=meta['Duration'].value
     duration=meta['Duration'][()]
-    #strain=dataFile['strain']['Strain'].value
     strain=dataFile['strain']['Strain'][()]
     dt=(1.0*duration)/len(strain)
 
@@ -42,73 +37,47 @@ def read_file(filename):
     return strain,dt,utc
 
 
+fname = 'LIGO/L-L1_LOSC_4_V2-1135136334-32.hdf5'
+tmp_name = 'LIGO/GW150914_4_template.hdf5'
 
-def getnobel(fname, tmp_name = 'LIGO/GW150914_4_template.hdf5'):
+# Loading data
+print('reading file ',fname)
+strain,dt,utc=read_file(fname)
 
-    # Loading data
-    print('reading file ',fname)
-    strain,dt,utc=read_file(fname)
+# Loading template
+tp,tx=read_template(tmp_name)
 
-    # Loading template
-    tp,tx=read_template(tmp_name)
-
-    # Creating window function
-    x=np.linspace(-np.pi/2,np.pi/2,len(strain))
-    win=np.cos(x)**1
-
-
-    # FT of data
-    noise_ft=np.fft.fft(win*strain)
-
-    # Smoothing our data to create weights
-    noise_smooth=smooth_vector(np.abs(noise_ft)**2, 10)
-    noise_smooth=noise_smooth[:len(noise_ft)//2+1] # will give us same length
-    tobs=dt*len(strain)
-    dnu=1/tobs
-    nu=np.arange(len(noise_smooth))*dnu
-    nu[0]=0.5*nu[1]
-    Ninv=1/noise_smooth     # Creating weights
-    Ninv[nu>1500]=0
-    Ninv[nu<20]=0
-
-    # Whitening the data
-    whitening_range = np.arange(1100, 5000)
-    vs_noise = smooth_vector(np.abs(noise_ft)**2, 10)[whitening_range]
-    w_noise = noise_ft[whitening_range]/vs_noise
-    plt.loglog(np.abs(noise_ft)**2)
-    plt.loglog(vs_noise)
-    plt.loglog(np.abs(w_noise)**2)
-    
-    
-
-    #plt.show()
-
-    # FFT of template
-    template_ft=np.fft.rfft(tp*win)
-    template_filt=template_ft*Ninv
-
-    # Matched filtering
-    data_ft=np.fft.rfft(strain*win)
-
-    filter = np.ones(len(data_ft))
-    filter[nu > 500] = 0
-    filter[nu < 40] = 0
-    #filter = filter*0 + 1
-    plt.clf()
-    plt.loglog(nu, np.abs(data_ft*filter)**2)
-    plt.show()
+# Creating window function
+x=np.linspace(-np.pi/2,np.pi/2,len(strain))
+win=np.cos(x)**1
 
 
-    #rhs=np.fft.irfft(data_ft*np.conj(template_filt)*filter)
-    rhs=np.fft.irfft(data_ft*np.conj(template_filt))
+# FT of data
+noise_ft=np.fft.rfft(win*strain)
+tobs=dt*len(noise_ft)
+dnu=1/tobs
+nu=np.arange(len(noise_ft))*dnu
+nu[0]=0.5*nu[1]
 
-    return rhs
+plt.loglog(nu, np.abs(noise_ft)**2, label = "Power Spectrum")
 
-#h = getnobel('LIGO/H-H1_LOSC_4_V2-1135136334-32.hdf5')
-l = getnobel('LIGO/L-L1_LOSC_4_V2-1135136334-32.hdf5', tmp_name = "LIGO/GW170104_4_template.hdf5")
 
-plt.clf()
-#plt.plot(h)
-plt.plot(l, ":k")
+# Smoothing our data to create weights
+noise_smooth=smooth_vector(np.abs(noise_ft)**2, 20)
+plt.loglog(nu[:-1], noise_smooth, label = "Smoothed Power Spectrum")
+plt.xlabel("Frequency")
+plt.ylabel("Amplitude")
+plt.legend()
+plt.savefig("figs/a6q5_comp_smooth_ps.jpg")
 plt.show()
 
+
+
+# Plotting the whitened data
+plt.clf()
+plt.loglog(nu[:-1], np.abs(noise_ft[:-1])**2/noise_smooth, label = "Whitened Power Spectrum")
+plt.xlabel("Frequency")
+plt.ylabel("Amplitude")
+plt.legend()
+plt.savefig("figs/a6q5_whitened_ps.jpg")
+plt.show()
