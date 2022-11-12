@@ -281,9 +281,9 @@ If we look at a zoomed up version of the detected signal in the time domain we s
 
 ![a6q5_tmp_and_data](figs/a6q5_zoom_location.jpg)
 
-If we zoom in on the peak, we can see it has a half-width of about $1.2\times 10^{-3}$, I think this corresponds to a good measure of the uncertainty on our measurement. Using the following geometry, we can calculate the angle from the sky (along a single axis only unfortunately, I think we would need either a third station or some other kind of information about the type of signal we're receiving).
+If we zoom in on the peak, we can see it has a half-width of about $1.2\times 10^{-3}$, I think this corresponds to a good measure of the uncertainty on our measurement. Using the following geometry, we can calculate the angle from the sky (along a single axis only unfortunately, I think we would need either a third station or some other kind of information about the type of signal we're receiving). The two points are the LIGO detectors, the arrows are the parrallel incoming GW. $\phi$ is the angle at which the waves are coming to the earth's surface, 0 being parrallel the crust.
 
-![a6q5_zoom_location](figs/geometry_ligo.jpg)
+![geometry_ligo](figs/geometry_ligo.jpg)
 
 The appropriate formula we should be using to get the angle $\phi$ as a function of the time difference is:
 
