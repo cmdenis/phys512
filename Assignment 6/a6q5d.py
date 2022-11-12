@@ -92,7 +92,6 @@ def getlocation(ename):
         w_data[nu > 1000] = 0
         
 
-
         # Match filtering
         template_ft=np.fft.fft(tp*win)
         rhs=np.fft.irfft(w_data*np.conj(template_ft))

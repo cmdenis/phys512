@@ -36,7 +36,6 @@ def read_file(filename):
     dataFile.close()
     return strain,dt,utc
 
-
 fname = 'LIGO/L-L1_LOSC_4_V2-1135136334-32.hdf5'
 tmp_name = 'LIGO/GW150914_4_template.hdf5'
 
