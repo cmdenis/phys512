@@ -261,3 +261,22 @@ We seem to get pretty decent SNRs for some of the events, others are not as good
 
 ### Part d)
 
+Using the results from part c), I tried to compare it to the analytic SNR. I am very confident I failed in my attempt. I tried computing the noise analytically using
+
+$$\text{noise} = \left(A^T N^{-1} A\right)^{-1/2}$$
+
+(Line `104` in `a6q5d.py`) I obtain a ridiculously small SNR of the order of $10^{-30}$. I suspect this is not normal. Had this worked, I would think that the analytical noise would be larger then the measured noise.
+
+### Part e)
+
+If we look at the spectrum of the whitened data, the template and the convolution, we get the following plot:
+
+![a6q5_tmp_and_data](figs/a6q5_tmp_and_data.jpg)
+
+We can see that most of the weight come from a frequency range between about 10 and 800 Hz. Hence the frequency in between these two delimiters is about 405 Hz.
+
+### Part f)
+
+If we look at a zoomed up version of the detected signal in the time domain we see the following:
+
+![a6q5_tmp_and_data](figs/a6q5_tmp_and_data.jpg)
