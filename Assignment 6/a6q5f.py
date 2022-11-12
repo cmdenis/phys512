@@ -1,0 +1,115 @@
+import numpy as np
+from matplotlib import pyplot as plt
+import h5py
+import glob
+import json
+
+
+def smooth_vector(vec,sig):
+    n = len(vec)                               
+    x = np.arange(n)                          
+    x[n//2:] = x[n//2:]-n                       # Axis
+    kernel = np.exp(-0.5*x**2/sig**2)           # Gaussian to convolve
+    kernel = kernel/kernel.sum()                # Normalize Gaussian
+    vecft = np.fft.rfft(vec)                    # FFT of array
+    kernelft = np.fft.rfft(kernel)              # FFT of gaussian
+    vec_smooth = np.fft.irfft(vecft*kernelft)   # convolve the data with the kernel
+    return vec_smooth
+def read_template(filename):
+    dataFile=h5py.File(filename,'r')
+    template=dataFile['template']
+    tp=template[0]
+    tx=template[1]
+    return tp,tx
+def read_file(filename):
+    dataFile=h5py.File(filename,'r')
+    dqInfo = dataFile['quality']['simple']
+    qmask=dqInfo['DQmask'][...]
+    meta=dataFile['meta']
+    gpsStart=meta['GPSstart'][()]
+    utc=meta['UTCstart'][()]
+    duration=meta['Duration'][()]
+    strain=dataFile['strain']['Strain'][()]
+    dt=(1.0*duration)/len(strain)
+
+    dataFile.close()
+    return strain,dt,utc
+
+
+
+def getlocation(ename):
+
+    print("Looking at event", ename)
+
+    # Opening JSON file to map and getting info
+    with open("LIGO/BBH_events_v3.json") as f:
+        events = f.read()
+
+    events = json.loads(events)
+    event = events[ename]
+
+        
+    tmp_name = "LIGO/" + event["fn_template"]
+    fname_h = "LIGO/" + event["fn_H1"]
+    fname_l = "LIGO/" + event["fn_L1"]
+    fname_list = [fname_h, fname_l]
+
+    locations = []
+
+    for fname in fname_list:
+        # Loading the data
+        print('Reading File:',fname)
+        strain,dt,utc=read_file(fname)
+
+        # Loading the template
+        print("Using template:", tmp_name)
+        tp,tx=read_template(tmp_name)
+        
+        # Generating the cosine window
+        x=np.linspace(-np.pi/2,np.pi/2,len(strain))
+        win=np.cos(x)
+
+        # Taking the fft of the data
+        noise_ft=np.fft.fft(win*strain)
+
+        
+
+        # Creating a smooth version of the spectrum
+        noise_smooth=smooth_vector(np.abs(noise_ft)**2, 20)
+
+        # Whitened data
+        w_data = noise_ft/noise_smooth
+
+        # Generating the axis
+        tobs=dt*len(strain)
+        dnu=1/tobs
+        nu=np.arange(len(noise_smooth))*dnu
+        nu[0]=0.5*nu[1]
+
+        w_data[nu < 10] = 0
+        w_data[nu > 1000] = 0
+        
+
+        # Match filtering
+        template_ft=np.fft.fft(tp*win)
+        rhs=np.fft.irfft(w_data*np.conj(template_ft))
+        times = np.arange(len(rhs))*dt/2
+
+        # Plotting
+        plt.plot(times, np.abs(rhs))
+        plt.xlabel("Time (s)")
+        plt.ylabel("m")
+        plt.xlim((0.4, 0.5))
+        plt.savefig("figs/a6q5_zoom_location.jpg")
+        plt.show()
+
+        locations.append(times[np.argmax(np.abs(rhs))])
+    return locations
+
+event_list = ['GW150914']
+
+for event in event_list:    
+    print()
+    times = getlocation(event)
+    print("Time of events at both detectors:", times)
+    print("Difference in time", np.abs(times[1] - times[0]))
