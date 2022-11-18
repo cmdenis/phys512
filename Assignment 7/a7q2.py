@@ -1,107 +1,81 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-4, 4, 1001)
 
-
-def gaussian(x, mean, sigma):
-    denominator = np.sqrt(2*np.pi)*sigma
-    return np.exp(-((x-mean)/sigma)**2/2)/denominator
-
-sigma = 1
-mean = 0
-gauss = gaussian(x, mean, sigma)
-
-N = 100001
-# Array of random number
-rand_n = np.zeros(N)
-
-
-
-# Using a recursive function
-def gaussian_rand(mean, sigma):
-    # Generating 2 random numbers
-    r = np.random.rand(2)
-    r[0] = r[0]*20 - 10
-    # Check if they are accepted, else try again recursively
-    if r[1] < gaussian(r[0], mean, sigma):
-        return r[0]
-    else:
-        return gaussian_rand(mean, sigma)
-
-
-
-
-# Using vectorizing and numpy arrays
-def rand_np(n, range, pdf):
-    dist = range[1] - range[0] # Distance between highest and lowest value in desired range
-    r1 = np.random.rand(n)*dist + range[0]
-    r2 = np.random.rand(n)
-
-    accept = r2 < pdf(r1)
-
-    return r1[accept]
-
-def f(x):
-    sigma = 1
-    mean = 0
-    denominator = np.sqrt(2*np.pi)*sigma
-    return np.exp(-((x-mean)/sigma)**2/2)/denominator
-
-gaussian_data = rand_np(1000000, [x[0], x[-1]], f)
-
-#print(len(gaussian_data))
-
-bins = np.linspace(x[0], x[-1], 50)
-plt.hist(gaussian_data, bins, density = True)
-plt.plot(x, f(x))
-#plt.show()
-plt.clf()
-
-
-
-
-
-# Using vectorizing and numpy arrays
-def PDF(x):
-    return
-
-def rand_exp(n, range):
-
-    dist = range[1] - range[0] # Distance between highest and lowest value in desired range
-    r1 = np.random.rand(n)*dist + range[0]
-    r2 = np.random.rand(n)
-
-    accept = r2 < pdf(r1)
-
-    return r1[accept]
-
-bins = np.linspace(-10, 10, 50)
-plt.hist(gaussian_data, bins, density = True)
-plt.plot(x, f(x))
-#plt.show()
-plt.clf()
-
-
-# Making a power law shaped distribution
+# Comparison between the different bounding distributions
 def power_law(x):
-    return 1/(x+1)/np.log(2)
+    return 1/(x+1)#/np.log(2)
+def gauss(x):
+    return np.exp(-x**2/2)#/(2 - 2/np.sqrt(np.e))
+def cauchy(x):
+    return 1/(x**2 + 1)#*4/np.pi
+def expo(x):
+    return np.exp(-x)#*np.e/(np.e - 1)
+
+x = np.linspace(0, 5, 1001)
+
+plt.plot(x, expo(x), label = "Exponential")
+plt.plot(x, power_law(x), label = "Power Law")
+plt.plot(x, gauss(x), label = "Gaussian")
+plt.plot(x, cauchy(x), label = "Cauchy")
+plt.plot(x, x*0+1, label = "Uniform")
+plt.title("Comparison between different distributions")
+plt.legend()
+plt.savefig("figs/a7q2_comp_dist.jpg")
+#plt.show()
+plt.clf()
+
+
+# First we define a function to get a cauchy distribution and make sure it works
 
 # Using a recursive function
-def pl_rand():
+def cauchy_rand():
     # Generating 2 random numbers
-    r = np.random.rand(2)
+    r = np.random.rand(2)*4
     r[0] = r[0]
     # Check if they are accepted, else try again recursively
-    if r[1] < power_law(r[0])*np.log(2):
+    if r[1] < cauchy(r[0]):
         return r[0]
     else:
-        return pl_rand()
+        return cauchy_rand()
 
-x = np.linspace(0, 1, 1001)
-power_law_samples = np.array([pl_rand() for i in range(100000)])
-bins = np.linspace(0, 1, 50)
-plt.hist(power_law_samples, bins, density = True)
-plt.plot(x, power_law(x))
+
+cauchy_samples = np.array([cauchy_rand() for i in range(100000)])
+bins = np.linspace(0, 4, 50)
+plt.hist(cauchy_samples, bins, density = True, label = "Samples From Cauchy")
+plt.plot(bins, cauchy(bins)/np.arctan(4), label = "Cauchy Distribution")
+plt.plot(bins, expo(bins)*(1 - np.cosh(4) + np.sinh(4)), label = "Exponential Distribution")
+plt.legend()
+plt.savefig("figs/a7q2_cauchy.jpg")
 plt.show()
+plt.clf()
+
+
+
+
+def rand_exp(n):
+    # Returns distribution with exponential distribution
+
+    # Compute two random numbers
+    r1 = np.random.rand(n)*4
+    r2 = np.array([cauchy_rand() for i in range(n)])
+
+
+    accept = r1 < expo(r2)/cauchy(r2)
+
+    return r2[accept]
+
+n = 1000000
+bins = np.linspace(0, 4, 50)
+rand_samples = rand_exp(n)
+print("The ratio of acceptance is:", len(rand_samples)/n)
+
+plt.clf()
+plt.hist(rand_samples, bins, density = True, label = "Samples")
+plt.plot(bins, expo(bins)/(1 - np.cosh(4) + np.sinh(4)), label = "Exponential Distribution")
+plt.legend()
+plt.savefig("figs/a7q2_expo_dist.jpg")
+plt.show()
+plt.clf()
+
 
