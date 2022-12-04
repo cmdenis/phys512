@@ -2,4 +2,4 @@
 
 By Christian Denis for PHYS-512
 
-![2_two_particles](2_two_particles.gif)
+![2_two_particles](2_particles.gif)
