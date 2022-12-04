@@ -5,8 +5,10 @@ from matplotlib import pyplot as plt
 from scipy import fft
 
 
+
 @nb.njit
 def inbound_array(xy,n):
+    '''Applies periodic conditions'''
     nflt=float(n)
     for i in nb.prange(xy.shape[0]):
         while xy[i,0]<-0.5:
@@ -20,6 +22,7 @@ def inbound_array(xy,n):
             xy[i,1]-=nflt
 
 def inbound_array_np(xy,n):
+    '''Applies periodic conditions but with numpy'''
     xy[xy<-0.5]=xy[xy<-0.5]+n
     xy[xy>=n-0.5]=xy[xy>=n-0.5]-n
 
@@ -35,6 +38,7 @@ def get_grad(xy,pot,grad):
     n=pot.shape[0]
     for i in nb.prange(xy.shape[0]):
         if xy[i,0]<0:
+            print("here:", xy[i,:])
             ix0=n-1
             ix1=0
             fx=xy[i,0]+1
@@ -71,7 +75,7 @@ def get_grad(xy,pot,grad):
         
 #@nb.njit
 def hist2d(xy,mat):
-    nx=xy.shape[0]
+    nx = xy.shape[0]
     for i in range(nx):
         ix=int(xy[i,0]+0.5)
         iy=int(xy[i,1]+0.5)
@@ -79,14 +83,16 @@ def hist2d(xy,mat):
 
 @nb.njit
 def hist2d_wmass(xy,mat,m):
-    nx=xy.shape[0]
+    '''Compute the density matrix'''
+    nx=xy.shape[0] # Number of particles
     for i in range(nx):
         ix=int(xy[i,0]+0.5)
         iy=int(xy[i,1]+0.5)
         if m[i]>0: #we can set m=0 to flag particles
-            mat[ix,iy]=mat[ix,iy]+m[i]
+            mat[ix,iy]=mat[ix,iy]+m[i] # Filling up the density matrix
     
 def get_kernel(n,r0):
+    '''This makes the 1/r relationship that we will be convolving with to get the potential at each point'''
     x=np.fft.fftfreq(n)*n
     rsqr=np.outer(np.ones(n),x**2)
     rsqr=rsqr+rsqr.T
@@ -96,25 +102,27 @@ def get_kernel(n,r0):
 
 
 class particles:
-    def __init__(self,npart=10000,n=1000,soft=1,periodic=True):
-        self.x=np.empty([npart,2])
-        self.f=np.empty([npart,2])
-        self.v=np.empty([npart,2])
-        self.grad=np.empty([npart,2])
-        self.m=np.empty(npart)
-        self.kernel=[]
-        self.kernelft=[]
-        self.npart=npart
-        self.ngrid=n
+    # Initializing the particles
+    def __init__(self,npart=500,n=10,soft=1,periodic=True):
+        self.x = np.empty([npart,2])          # Positions
+        self.f = np.empty([npart,2])          # Forces
+        self.v = np.empty([npart,2])          # Velocities
+        self.grad = np.empty([npart,2])       # Gradient
+        self.m = np.empty(npart)              # Masses
+        self.kernel = []                      # Kernel
+        self.kernelft = []                    # FT of Kernel
+        self.npart = npart                    # Number of particles
+        self.ngrid = n                        # Size of grid?
         if periodic:
-            self.rho=np.empty([self.ngrid,self.ngrid])
-            self.pot=np.empty([self.ngrid,self.ngrid])
+            self.rho = np.empty([self.ngrid, self.ngrid])
+            self.pot = np.empty([self.ngrid, self.ngrid])
         else:
-            self.rho=np.empty([2*self.ngrid,2*self.ngrid])
-            self.pot=np.empty([2*self.ngrid,2*self.ngrid])
+            self.rho = np.empty([2*self.ngrid, 2*self.ngrid])
+            self.pot = np.empty([2*self.ngrid, 2*self.ngrid])
 
-        self.soft=soft
-        self.periodic=periodic
+        self.soft = soft                        # Softening factor
+        self.periodic = periodic                # Periodic boolean
+    # Different ways to position the particles initially
     def ics_poisson(self):
         self.x[:]=np.random.rand(self.npart,2)*self.ngrid-0.5
         self.m[:]=1
@@ -131,7 +139,6 @@ class particles:
         self.v[:]=0
         self.v[:self.npart//2,1]=25
         self.v[self.npart//2:,1]=-25
-
     def ics_powlaw(self,ind=-2,amp=0.01):
         vec=np.fft.fftfreq(self.ngrid)*self.ngrid
         rsqr=np.outer(np.ones(self.ngrid),vec**2)
@@ -156,21 +163,27 @@ class particles:
         self.v=np.zeros([self.npart,2])
         self.f=np.empty([self.npart,2])
         self.grad=np.empty([self.npart,2])
-
+    def ics_corner(self):
+        self.x[:] = 1
+        self.v[:] = 0
     def get_kernel(self):
+        '''Gets the spectrum of the kernel (the 1/r distribution)'''
         if self.periodic:
             self.kernel=get_kernel(self.ngrid,self.soft)
         else:
             self.kernel=get_kernel(2*self.ngrid,self.soft)
         self.kernelft=fft.rfft2(self.kernel)
     def get_rho(self):
+        '''Gets density of particles per cell'''
         if self.periodic:
             inbound_array_np(self.x,self.ngrid)
         else:
             mask_array_np(self.x,self.m,self.ngrid)
         self.rho[:]=0
         hist2d_wmass(self.x,self.rho,self.m)
+
     def get_pot(self):
+        '''Gets the potential by convolving kernel with the density function'''
         t1=time.time()
         self.get_rho()
         #print('got density: ',time.time()-t1)
@@ -182,24 +195,58 @@ class particles:
         #self.pot=fft.irfft2(rhoft*self.kernelft,[self.ngrid,self.ngrid])
         self.pot=fft.irfft2(rhoft*self.kernelft,[n,n])
         #print('got ft 2: ',time.time()-t1)
+
     def get_forces(self):
         get_grad(self.x,self.pot,self.grad)
         self.f[:]=self.grad
+
     def take_step(self,dt=1):
         self.x[:]=self.x[:]+dt*self.v
         self.get_pot()
         self.get_forces()
         self.v[:]=self.v[:]+self.f*dt
+    def two_particles(self):
+        self.x[0] = np.array([50, 30])
+        self.x[1] = np.array([50, 50])
+        fact = 0.1
+        self.v[0] = np.array([-1, 0])*fact
+        self.v[1] = np.array([1, 0])*fact
+
+        self.m[:] = 8
+
+
+'''Initialize the particle'''
+parts=particles(
+    npart=2,
+    n = 100,
+    soft=1,
+    periodic=True)
 
 
 
-parts=particles(npart=10000000,soft=2,periodic=True)
-
+'''Give our particles' positions and velocities'''
 #parts.ics_gauss()
 #parts.ics_poisson()
+#parts.ics_corner()
+parts.two_particles()
 #parts.ics_powlaw(ind=-2)
-parts.ics_2gauss()
+#parts.ics_2gauss()
+
+#plt.contourf(get_kernel(1000, 50))
+#plt.show()
+
+#assert(0==1)
+
 parts.get_kernel()
+parts.get_rho()
+
+print(parts.x)
+print(parts.m)
+
+plt.imshow(parts.pot)
+plt.show()
+
+#assert(0==1)
 
 plt.ion()
 #parts.x=parts.x/2
@@ -208,26 +255,28 @@ parts.get_pot()
 
 rho=parts.rho.copy()
 pot=parts.pot.copy()
-osamp=3
+osamp=10
 
-
+#assert(0==1)
 fig = plt.figure()
 ax = fig.add_subplot(111)
-crap=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+crap = ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
-for i in range(1500):
+for i in range(500):
     t1=time.time()
     for j in range(osamp):
         parts.take_step(dt=0.02)
     t2=time.time()
+
+    print(parts.f)
     kin=np.sum(parts.v**2)
     pot=np.sum(parts.rho*parts.pot)
-    print(t2-t1,kin,pot,kin-0.5*pot)
+    #print(t2-t1,kin,pot,kin-0.5*pot)
     #assert(1==0)
     #plt.clf()
     #plt.imshow(parts.rho**0.5)#,vmin=0.9,vmax=1.1)
     #plt.colorbar()
 
-
-    crap.set_data(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+    crap.set_data(parts.pot)
+    #crap.set_data(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
     plt.pause(0.001)
