@@ -153,7 +153,7 @@ class particles:
 
 
 # Initializing our system with 2 particles
-parts=particles(npart=2,n = 100, soft=2,periodic=False)
+parts=particles(npart=2,n = 100, soft=2,periodic=True)
 parts.two_particles()
 
 # Get the kernel
@@ -165,14 +165,14 @@ parts.get_pot()
 rho=parts.rho.copy()
 pot=parts.pot.copy()
 
-osamp=40    
+osamp=60    
 
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 crap=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
-times = 500
+times = 1000
 
 energies = np.empty([3, times])
 
