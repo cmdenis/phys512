@@ -8,19 +8,30 @@ plt.ion()
 
 
 def inbound_array_np(xy,n):
-    '''Applies periodic conditions with numpy arrays'''
+    '''
+    Applies periodic conditions with numpy arrays.
+    If the position goes out of bound it gets put back at the begining.
+    '''
     xy[xy<-0.5] = xy[xy <- 0.5] + n
     xy[xy>=n-0.5] = xy[xy >= n-0.5]-n
 
 def mask_array_np(xy,m,n):
-    '''Mask for non-periodic boundary conditions'''
+    '''
+    Mask for non-periodic boundary conditions.
+    If a value goes out of bound, its mass gets reduced to 0.
+    '''
     for i in range(xy.shape[1]):
         m[xy[:,i]<-0.5]=0
         m[xy[:,i]>=n-0.5]=0
 
 @nb.njit(parallel=True)
 def get_grad(xy,pot,grad):
-    '''Function to compute the gradient of an array'''
+    '''
+    Function to compute the gradient of an array.
+    It basically uses the slope between neighboring cell sites to create the gradient.
+    Beforehand it takes care of some conditionals involving the position of the particles
+    with respect to the first and last cell in the density (rho) array.
+    '''
     n=pot.shape[0]
     for i in nb.prange(xy.shape[0]):
         if xy[i,0]<0:
@@ -43,16 +54,16 @@ def get_grad(xy,pot,grad):
             fy=xy[i,1]-iy0
             if iy1==n:
                 iy1=0
-        #potential is f00(1-fx)(1-fy)+f01(1-fx)(fy)+f10(fx)(1-fy)+f11(fx)(fy)
-        #grad_x is -f00(1-fy)-f01(fy)+f10(1-fy)+f11(fy)
-        #grad_y is -f00(1-fx)+f01(1-fx)-f10(fx)+f11(fx)
-        #grad[i,0]=pot[ix0,iy0]*(fy-1)-pot[ix0,iy1]*fy+pot[ix1,iy0]*(1-fy)+pot[ix1,iy1]*ft
+
         grad[i,0]=(pot[ix1,iy1]-pot[ix0,iy1])*fy+(pot[ix1,iy0]-pot[ix0,iy0])*(1-fy)
         grad[i,1]=(pot[ix1,iy1]-pot[ix1,iy0])*fx+(pot[ix0,iy1]-pot[ix0,iy0])*(1-fx)
 
-
 @nb.njit
 def hist2d_wmass(xy,mat,m):
+    '''
+    Creates the histogram for the density (rho) array, 
+    based on the masses and positions of the particles.
+    '''
     nx=xy.shape[0]
     for i in range(nx):
         ix = int(xy[i,0]+0.5)
@@ -60,39 +71,41 @@ def hist2d_wmass(xy,mat,m):
         if m[i] > 0: #we can set m=0 to flag particles
             mat[ix,iy]=mat[ix,iy]+m[i]
 
-
 class particles:
     def __init__(self,npart=10000,n=1000,soft=1,periodic=True):
-        self.x = np.empty([npart,2])
-        self.f = np.empty([npart,2])
-        self.v = np.empty([npart,2])
-        self.grad = np.empty([npart,2])
-        self.m = np.empty(npart)
-        self.kernel = []
-        self.kernelft = []
-        self.npart = npart
-        self.ngrid = n
-        if periodic:
+        self.x = np.empty([npart,2])        # Positions
+        self.v = np.empty([npart,2])        # Velocities
+        self.f = np.empty([npart,2])        # Forces
+        self.m = np.empty(npart)            # Masses
+        self.kernel = []                    # Kernel
+        self.kernelft = []                  # FFT of kernel
+        self.npart = npart                  # Number of particles
+        self.ngrid = n                      # Width and height of grid
+
+        if periodic: # Creating array for rho and potential based on the size of the grid
             self.rho = np.empty([self.ngrid,self.ngrid])
             self.pot = np.empty([self.ngrid,self.ngrid])
-        else:
+
+        else:   # Making rho twice the size if not periodic
             self.rho = np.empty([2*self.ngrid,2*self.ngrid])
             self.pot = np.empty([2*self.ngrid,2*self.ngrid])
 
-        self.soft = soft
-        self.periodic = periodic
-
+        self.soft = soft            # Softening
+        self.periodic = periodic    # Periodicity boolean
 
     def two_particles(self):
-
-        n = self.ngrid
+        '''
+        Initializes the positions of two particles at the center of the grid 
+        with some opposite velocities.
+        '''
+        n = self.ngrid  # Size of grid
 
         # Positioning the particles at the center of the plane separated from each other
-        self.x[0] = np.array([n/2, n*0.4])
-        self.x[1] = np.array([n/2, n*0.6])
+        self.x[0] = np.array([n/2, n*0.4])  # Positioned at 40% of the grid (Particle 1)
+        self.x[1] = np.array([n/2, n*0.6])  # Positioned at 60% of the grid (Particle 2)
         factor = 0.5
-        self.v[0] = np.array([-1, 0])*factor
-        self.v[1] = np.array([1, 0])*factor
+        self.v[0] = np.array([-1, 0])*factor    # Initial velocity (Particle 1)
+        self.v[1] = np.array([1, 0])*factor     # Initial velocity (Particle 2)
 
         self.m[:] = 8
 
@@ -108,44 +121,43 @@ class particles:
             rsqr[rsqr<soft**2]=soft**2
             self.kernel=rsqr**-0.5
         else:
+            # Makes the kernel twice as big for non-periodic BC
             x=np.fft.fftfreq(ngrid*2)*ngrid*2
             rsqr=np.outer(np.ones(ngrid*2),x**2)
             rsqr=rsqr+rsqr.T
             rsqr[rsqr<soft**2]=soft**2
             self.kernel=rsqr**-0.5
 
-        self.kernelft=fft.rfft2(self.kernel)
-
+        self.kernelft=fft.rfft2(self.kernel)    # Fourier transform of kernel
 
     def get_rho(self):
         '''Method to get the density in a grid of the particles.'''
         if self.periodic:
+            # If periodic, give appropriate location to particles that are outside bounds
             inbound_array_np(self.x,self.ngrid)
         else:
+            # If not periodic, sets masses to 0, if they're outside the bounds
             mask_array_np(self.x,self.m,self.ngrid)
         self.rho[:]=0
+
+        # Creates histogram for density array (rho)
         hist2d_wmass(self.x,self.rho,self.m)
     
     def get_pot(self):
         '''Method to get the potential using a convolution of kernel and density'''
-        t1=time.time()
         self.get_rho()
-        #print('got density: ',time.time()-t1)
         rhoft=fft.rfft2(self.rho)
-        #print('got ft 1: ',time.time()-t1)
         n=self.ngrid
         if not(self.periodic):
             n=n*2
-        #self.pot=fft.irfft2(rhoft*self.kernelft,[self.ngrid,self.ngrid])
         self.pot=fft.irfft2(rhoft*self.kernelft,[n,n])
-        #print('got ft 2: ',time.time()-t1)
     
     def get_forces(self):
         '''Get the force on every particle using the gradient of the potential.'''
-        get_grad(self.x,self.pot,self.grad)
-        self.f[:]=self.grad
+        get_grad(self.x,self.pot,self.f)
     
     def take_step(self,dt=1):
+        # Takes step using leapfrog
         self.x[:]=self.x[:]+dt*self.v
         self.get_pot()
         self.get_forces()
@@ -170,34 +182,30 @@ osamp=60
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-crap=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+res=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
 times = 1000
 
 energies = np.empty([3, times])
+print(parts.m)
 
 for i in range(times):
 
     for j in range(osamp):
         parts.take_step(dt=0.01)
 
-    kin =np.sum(parts.v**2 * parts.m)/2
+    # Energies
+    kin = np.sum(parts.v**2 * parts.m)/2
     pot = np.sum(parts.rho * parts.pot)
     tot = kin+pot
-    # Storing values in array
+    # Storing values in array for plotting
     energies[0, i] = kin 
     energies[1, i] = pot 
     energies[2, i] = tot 
     print("\nKinetic Energy:", kin, "\nPotential:", pot, "\nTotal Energy:", tot)
 
 
-    #assert(1==0)
-    #plt.clf()
-    #plt.imshow(parts.rho**0.5)#,vmin=0.9,vmax=1.1)
-    #plt.colorbar()
-
-
-    crap.set_data(parts.rho[:parts.ngrid,:parts.ngrid])
+    res.set_data(parts.rho[:parts.ngrid, :parts.ngrid])
     plt.savefig(f'figs/two_particles/{i:003}', dpi = 50)
     plt.pause(0.001)
 

@@ -2,21 +2,32 @@ import matplotlib.pyplot as plt
 import os
 import imageio as img
 
+def makegif(frames_path, output_name, fps = 30):
+    # List of images
+    img_list = os.listdir(frames_path)
+    img_list.sort()
+    try:
+        img_list.remove(".DS_Store")
+    except:
+        1==1
+
+    # List of frames
+    frames = []
+
+    for frame in img_list:
+        frames.append(img.v2.imread(frames_path+"/"+frame))
+
+    img.mimsave(output_name, frames, fps = fps)
+
+
+# 1) one particle
+makegif("figs/single_particle", "gifs/1_particle.gif")
 
 # 2) Two particles
+makegif("figs/two_particles", "gifs/2_particles.gif")
 
-# List of images
-img_list = os.listdir("figs/two_particles")
-img_list.sort()
-img_list.remove(".DS_Store")
+# 3) Many particles
+makegif("figs/periodic", "gifs/3_periodic.gif")
+makegif("figs/non_periodic", "gifs/3_non_periodic.gif")
 
-# List of frames
-frames = []
-
-for frame in img_list:
-    frames.append(img.v2.imread("figs/two_particles/"+frame))
-
-img.mimsave("gifs/2_particles.gif", frames, fps = 30)
-
-
-
+# 4) 

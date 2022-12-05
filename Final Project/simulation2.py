@@ -191,6 +191,7 @@ class Particles:
 
     def start_uniform(self, v_scale = 1.0):
         # Create an initial uniformly random distribution of particles
+        np.random.seed(514) # Use a seed for repeatability
         system.x[:] = np.random.rand(self.nb_part, 2)*self.nb_grid
         system.v[:] = np.random.randn(self.nb_part, 2)*1.0
         system.m[:] = 1
