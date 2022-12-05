@@ -4,7 +4,7 @@ import time
 import imageio
 from matplotlib import pyplot as plt
 from scipy import fft
-
+plt.ion()
 
 
 def inbound_array_np(xy,n):
@@ -56,6 +56,7 @@ def get_grad(xy,pot,grad):
 
 @nb.njit
 def hist2d_wmass(xy,mat,m):
+    ''' Create the density histogram which will correspond to rho'''
     nx=xy.shape[0]
     for i in range(nx):
         ix=int(xy[i,0]+0.5)
@@ -65,6 +66,7 @@ def hist2d_wmass(xy,mat,m):
 
 
 def get_kernel(n,r0):
+    '''Obtain the kernel'''
     x=np.fft.fftfreq(n)*n
     rsqr=np.outer(np.ones(n),x**2)
     rsqr=rsqr+rsqr.T
@@ -95,49 +97,6 @@ class particles:
         self.periodic=periodic
 
 
-    def ics_poisson(self):
-        self.x[:]=np.random.rand(self.npart,2)*self.ngrid-0.5
-        self.m[:]=1
-        self.v[:]=0
-    
-    def ics_gauss(self):
-        self.x[:]=np.random.randn(self.npart,2)*(self.ngrid/12)+self.ngrid/2
-        self.m[:]=1
-        self.v[:]=0
-
-    def ics_2gauss(self):
-        self.x[:]=np.random.randn(self.npart,2)*(self.ngrid/12)+self.ngrid/2
-        self.x[:self.npart//2,0]=self.x[:self.npart//2,0]-self.ngrid/5
-        self.x[self.npart//2:,0]=self.x[self.npart//2:,0]+self.ngrid/5
-        self.m[:]=1
-        self.v[:]=0
-        self.v[:self.npart//2,1]=25
-        self.v[self.npart//2:,1]=-25
-
-    def ics_powlaw(self,ind=-2,amp=0.01):
-        vec=np.fft.fftfreq(self.ngrid)*self.ngrid
-        rsqr=np.outer(np.ones(self.ngrid),vec**2)
-        rsqr=rsqr+rsqr.T
-        rsqr[0,0]=1
-        ampmat=rsqr**(ind/2)
-        ampmat[0,0]=0
-        crud=np.random.randn(self.ngrid,self.ngrid)
-        crudft=fft.fft2(crud)
-        crudft=crudft*ampmat
-        crud=np.real(fft.ifft2(crudft))
-        crud=crud/np.std(crud)
-        m=1+crud*amp
-        vv=np.arange(self.ngrid)-0.1
-        x,y=np.meshgrid(vv,vv)
-        x=np.ravel(x)
-        y=np.ravel(y)
-        xy=np.vstack([x,y]).T
-        self.npart=xy.shape[0]
-        self.x=xy
-        self.m=np.ravel(m)
-        self.v=np.zeros([self.npart,2])
-        self.f=np.empty([self.npart,2])
-        self.grad=np.empty([self.npart,2])
 
     def two_particles(self):
         n = self.ngrid
@@ -150,12 +109,16 @@ class particles:
         self.v[1] = np.array([1, 0])*factor
 
         self.m[:] = 8
+
+
     def get_kernel(self):
         if self.periodic:
             self.kernel=get_kernel(self.ngrid,self.soft)
         else:
             self.kernel=get_kernel(2*self.ngrid,self.soft)
         self.kernelft=fft.rfft2(self.kernel)
+
+
     def get_rho(self):
         if self.periodic:
             inbound_array_np(self.x,self.ngrid)
@@ -184,21 +147,12 @@ class particles:
         self.get_forces()
         self.v[:]=self.v[:]+self.f*dt
 
-2
 
-parts=particles(npart=2,n = 50, soft=2,periodic=True)
-
-#parts.ics_gauss()
-#parts.ics_poisson()
-#parts.ics_powlaw(ind=-2)
-#parts.ics_2gauss()
+parts=particles(npart=2,n = 50, soft=2, periodic=False)
 
 parts.two_particles()
 
 parts.get_kernel()
-
-plt.ion()
-#parts.x=parts.x/2
 xy=parts.x.copy()
 parts.get_pot()
 
