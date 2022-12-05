@@ -16,7 +16,7 @@ frames = []
 for frame in img_list:
     frames.append(img.v2.imread("figs/two_particles/"+frame))
 
-img.mimsave("2_particles.gif", frames, fps = 30)
+img.mimsave("gifs/2_particles.gif", frames, fps = 30)
 
 
 

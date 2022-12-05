@@ -108,9 +108,8 @@ class particles:
             rsqr[rsqr<soft**2]=soft**2
             self.kernel=rsqr**-0.5
         else:
-            ngrid2 = ngrid*2
-            x=np.fft.fftfreq(ngrid2)*ngrid2
-            rsqr=np.outer(np.ones(ngrid2),x**2)
+            x=np.fft.fftfreq(ngrid*2)*ngrid*2
+            rsqr=np.outer(np.ones(ngrid*2),x**2)
             rsqr=rsqr+rsqr.T
             rsqr[rsqr<soft**2]=soft**2
             self.kernel=rsqr**-0.5
@@ -154,7 +153,7 @@ class particles:
 
 
 # Initializing our system with 2 particles
-parts=particles(npart=2,n = 50, soft=2,periodic=True)
+parts=particles(npart=2,n = 100, soft=2,periodic=False)
 parts.two_particles()
 
 # Get the kernel
@@ -173,20 +172,42 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 crap=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
-for i in range(500):
-    #t1=time.time()
+times = 500
+
+energies = np.empty([3, times])
+
+for i in range(times):
+
     for j in range(osamp):
-        parts.take_step(dt=0.02)
-    #t2=time.time()
-    #kin=np.sum(parts.v**2)
-    #pot=np.sum(parts.rho*parts.pot)
-    #print(t2-t1,kin,pot,kin-0.5*pot)
+        parts.take_step(dt=0.01)
+
+    kin =np.sum(parts.v**2 * parts.m)/2
+    pot = np.sum(parts.rho * parts.pot)
+    tot = kin+pot
+    # Storing values in array
+    energies[0, i] = kin 
+    energies[1, i] = pot 
+    energies[2, i] = tot 
+    print("\nKinetic Energy:", kin, "\nPotential:", pot, "\nTotal Energy:", tot)
+
+
     #assert(1==0)
     #plt.clf()
     #plt.imshow(parts.rho**0.5)#,vmin=0.9,vmax=1.1)
     #plt.colorbar()
 
 
-    crap.set_data(parts.rho)
+    crap.set_data(parts.rho[:parts.ngrid,:parts.ngrid])
     plt.savefig(f'figs/two_particles/{i:003}', dpi = 50)
     plt.pause(0.001)
+
+plt.clf()
+plt.plot(energies[0, :], label = "Kinetic Energy")
+plt.plot(energies[1, :], label = "Potential Energy")
+plt.plot(energies[2, :], label = "Total Energy")
+plt.xlabel("Timesteps")
+plt.ylabel("Energy")
+plt.legend()
+plt.title("Evolution of energy of the system for two particles")
+plt.savefig("figs/2particles_energy.jpg")
+plt.show()
