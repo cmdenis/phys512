@@ -36,3 +36,12 @@ If we plot the total energy as a function of time, we obtain
 
 ![2_two_particles](figs/per_vs_nonper.jpg)
 
+## Part 4
+
+![rk_periodic](gifs/rk4_periodic.gif)
+
+![rk_nonperiodic](gifs/rk4_nonperiodic.gif)
+
+If we plot the total energy as a function of time, we obtain
+
+![2_two_particles](figs/rk_per_vs_nonper.jpg)
