@@ -31,7 +31,7 @@ y_data = np.empty(500)
 for i in range(500):
 
     for j in range(osamp):
-        parts.take_step(dt=0.02)
+        parts.take_step(dt=0.01)
 
     print("Step", i)
     x_data[i] = parts.x[0, 0]

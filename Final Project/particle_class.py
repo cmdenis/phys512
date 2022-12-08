@@ -115,6 +115,22 @@ class particles:
         self.v[:] = 0    
         self.m[:] = 1
 
+    def two_particles(self):
+        '''
+        Initializes the positions of two particles at the center of the grid 
+        with some opposite velocities.
+        '''
+        n = self.ngrid  # Size of grid
+
+        # Positioning the particles at the center of the plane separated from each other
+        self.x[0] = np.array([n/2, n*0.4])  # Positioned at 40% of the grid (Particle 1)
+        self.x[1] = np.array([n/2, n*0.6])  # Positioned at 60% of the grid (Particle 2)
+        factor = 0.5
+        self.v[0] = np.array([-1, 0])*factor    # Initial velocity (Particle 1)
+        self.v[1] = np.array([1, 0])*factor     # Initial velocity (Particle 2)
+
+        self.m[:] = 20
+
     def get_kernel(self):
         '''Create the kernel (and fft of kernel) to convolve with density grid.'''
         ngrid = self.ngrid
