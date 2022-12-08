@@ -4,7 +4,17 @@ By Christian Denis for PHYS-512
 
 ## Part 1
 
-Here we use an $n$-body simulation to show the behavior of a single particle. This is more of a test than anything.
+Here we use an $n$-body simulation to show the behavior of a single free particle. This is more of a test than anything. Nothing too interesting is happening here.
+
+We expect our particle to stay put, and indeed this is what is happening as demonstrated by this uneventful GIF.
+
+![2_two_particles](gifs/1_particle.gif)
+
+Maybe there's some stuff happening on the smaller scale that is not displayed by the GIF however... Let's make a plot of the XY positions over time to see if there's stuff we're missing:
+
+![2_two_particles](figs/single_position.jpg)
+
+Looks pretty static.
 
 ## Part 2
 

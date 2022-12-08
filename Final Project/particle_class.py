@@ -107,6 +107,14 @@ class particles:
         self.v[:] = 0    # 0 Initial velocity (Particle 1)
         self.m[:] = 1
 
+    def single_particle(self):
+        '''
+        Initializes the position of 1 particle at roughly the center of the grid
+        '''
+        self.x[:] = [self.ngrid//2, self.ngrid//2]
+        self.v[:] = 0    
+        self.m[:] = 1
+
     def get_kernel(self):
         '''Create the kernel (and fft of kernel) to convolve with density grid.'''
         ngrid = self.ngrid
