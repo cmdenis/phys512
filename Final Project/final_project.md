@@ -4,6 +4,8 @@ By Christian Denis for PHYS-512
 
 ## Part 1
 
+This part is computed in `1_single_particle.py`, using the `Particle` class defined in `particle_class.py`. The GIFs are generated using the script `make_gif.py`.
+
 Here we use an $n$-body simulation to show the behavior of a single free particle. This is more of a test than anything. Nothing too interesting is happening here.
 
 We expect our particle to stay put, and indeed this is what is happening as demonstrated by this uneventful GIF.
@@ -17,6 +19,8 @@ Maybe there's some stuff happening on the smaller scale that is not displayed by
 Looks pretty static.
 
 ## Part 2
+
+This part is computed in `2_two_particles.py`, using the `Particle` class defined in `particle_class.py`. The GIFs are generated using the script `make_gif.py`.
 
 Here we use the same $n$-body simulation to show two particles orbiting each other. This result is more interesting than the previous one, but is also sort of a test to make sure our simulation doesn't present any problems. The following GIF shows the simulation:
 
@@ -51,6 +55,8 @@ If we plot the total energy as a function of time, we obtain
 For the periodic case, it looks like the total energy is somewhat flat. It increases at a stable state through the simulation. This is not the case for the non-periodic simulation. We see important spikes in the energy. I think these spikes arrize whenever the cluster collapses on itself. In the GIF we see the cluster sort of pulsating in a damped way. I would think that this energy misconservation might be coming from the fact that the particles are getting really close to each other and moving at appreciable velocities, thus end up "skipping over" the center of the potential. I would think that a similar mechanism holds to make the peak decrease as well.
 
 ## Part 4
+
+This part is computed in `4_rk.py`, using the `Particle` class defined in `particle_class.py`. The GIFs are generated using the script `make_gif.py`.
 
 For this part, we performed the same exact simulation (same initial conditions as well) as for the previous part, but using a RK4 integrator. The integrator looks like this:
 
