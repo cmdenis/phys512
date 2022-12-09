@@ -1,51 +1,65 @@
 import numpy as np
 import numba as nb
-import time
 from particle_class import *
-import imageio
 from matplotlib import pyplot as plt
 from scipy import fft
 plt.ion()
 
+
+
+
 # We simulate the periodic boundary conditions first
 
-# Initializing our system
-npart = 200000
-ng = 1000
-parts=particles(npart=npart, n = ng, periodic=True)
+# Instantiate our system
+npart = 200000  # Number of particles
+ng = 1000       # Size of grid
+parts = Particles(
+    npart=npart, 
+    n = ng, 
+    periodic = True
+    )
+
+# Initialize particles
 parts.many_particles()
-print("System Initialized")
 # Get the kernel
 parts.get_kernel()
-print("Got kernel")
-# Copy 
-xy=parts.x.copy()
+# Copy stuff to avoid problems
+xy = parts.x.copy()
 parts.get_pot()
-rho=parts.rho.copy()
-pot=parts.pot.copy()
+rho = parts.rho.copy()
+pot = parts.pot.copy()
 
-print(parts.m)
+# Over sampling
+over_sample = 12    
 
-osamp = 12    
-
+# Setup figure
 fig = plt.figure()
 ax = fig.add_subplot(111)
-res=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+res = ax.imshow(parts.rho[:parts.ngrid, :parts.ngrid]**0.5)
 
+# Number of frames
 times = 500
 
+# Energy arrays
 energies_per = np.empty([3, times])
 energies_nonper = np.empty([3, times])
-print("Ready to start")
+
+
+
+
+
+# Main loop
 for i in range(times):
 
-    for j in range(osamp):
-        parts.take_step(dt=0.01)
+    # Oversampling loop
+    for j in range(over_sample):
+        parts.take_step(dt = 0.01)
 
     # Energies
     kin = np.sum(parts.v**2)/2
     pot = np.sum(parts.rho * parts.pot)
     tot = kin+pot
+
     # Storing values in array for plotting
     energies_per[0, i] = kin 
     energies_per[1, i] = pot 
@@ -58,30 +72,55 @@ for i in range(times):
     plt.pause(0.001)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # We simulate the same system but with nonperiodic conditions
 
 # Initializing our system with 400 particles
-parts=particles(npart=npart, n = ng, periodic=False)
-parts.many_particles()
+parts = Particles(
+    npart=npart, 
+    n = ng, 
+    periodic = False
+    )
 
+# Initialize particles
+parts.many_particles()
 # Get the kernel
 parts.get_kernel()
-
-# Copy 
-xy=parts.x.copy()
+# Get potential
 parts.get_pot()
-rho=parts.rho.copy()
-pot=parts.pot.copy()
+# Copy stuff to avoid problems
+xy = parts.x.copy()
+rho = parts.rho.copy()
+pot = parts.pot.copy()
 
-
+# Setting plotting stuff
 plt.clf()
 fig = plt.figure()
 ax = fig.add_subplot(111)
-res=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+res = ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
+
+
+
+# Main loop
 for i in range(times):
 
-    for j in range(osamp):
+    # Oversampling loop
+    for j in range(over_sample):
         parts.take_step(dt=0.01)
 
     # Energies
@@ -94,18 +133,21 @@ for i in range(times):
     energies_nonper[2, i] = tot 
     print("\nKinetic Energy:", kin, "\nPotential:", pot, "\nTotal Energy:", tot)
 
-
+    # Plotting and saving
     res.set_data(parts.rho[:parts.ngrid, :parts.ngrid])
     plt.savefig(f'figs/non_periodic/{i:003}', dpi = 50)
     plt.pause(0.001)
 
 
-print("here")
 
 
+
+
+
+
+
+# Plotting the evolution of total energy for periodic AND non-periodic systems
 plt.clf()
-#plt.plot(energies_per[0, :], label = "Kinetic Energy (Periodic)")
-#plt.plot(energies[1, :], label = "Potential Energy")
 plt.plot(energies_per[2, :], label = "Total Energy (Periodic)")
 plt.plot(energies_nonper[2, :], label = "Total Energy (Non-Periodic)")
 plt.xlabel("Timesteps")

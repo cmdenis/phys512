@@ -7,38 +7,55 @@ from matplotlib import pyplot as plt
 from scipy import fft
 plt.ion()
 
+# Instantiating the system
+parts = Particles(
+    npart = 1,          # Number of particles
+    n = 100,            # Size of grid
+    soft = 1,           # Softening
+    periodic = False    # Periodic Boolean
+    )
 
-parts=Particles(npart=1, n = 100, soft=1, periodic=False)
-
+# Initializing the system
 parts.single_particle()
 
+# Getting the kernel
 parts.get_kernel()
-xy=parts.x.copy()
+
+# Getting the potential
 parts.get_pot()
 
-rho=parts.rho.copy()
-pot=parts.pot.copy()
-osamp=40
+# Copying stuff to avoid problems
+xy = parts.x.copy()
+rho = parts.rho.copy()
+pot = parts.pot.copy()
 
 
+# Over sampling
+over_sample = 12  
+
+# Setting figure stuff
 fig = plt.figure()
 ax = fig.add_subplot(111)
-crap=ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
-times = 500
-x_data = np.empty(500)
-y_data = np.empty(500)
+res = ax.imshow(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
 
-for i in range(500):
+times = 500                 # Number of frames
+x_data = np.empty(times)    # Creating array for x-position
+y_data = np.empty(times)    # Creating array for y-position
 
-    for j in range(osamp):
-        parts.take_step(dt=0.01)
+# Main loop for frames
+for i in range(times):
+
+    # Oversampling loop
+    for j in range(over_sample):
+        parts.take_step(dt = 0.01)
 
     print("Step", i)
+    # Storing positions
     x_data[i] = parts.x[0, 0]
     y_data[i] = parts.x[0, 1]
     
-
-    crap.set_data(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
+    # Plotting and saving
+    res.set_data(parts.rho[:parts.ngrid,:parts.ngrid]**0.5)
     plt.savefig(f'figs/single_particle/{i:003}', dpi = 50)
     plt.pause(0.001)
 

@@ -1,32 +1,32 @@
 import numpy as np
 import numba as nb
-import time
-import imageio
 from matplotlib import pyplot as plt
 from scipy import fft
-#plt.ion()
 
 
-def inbound_array_np(xy,n):
+# Here we define the Particle class to be used in our simulations
+
+
+def inbound_array_np(xy, n):
     '''
     Applies periodic conditions with numpy arrays.
     If the position goes out of bound it gets put back at the begining.
     '''
-    xy[xy<-0.5] = xy[xy <- 0.5] + n
-    xy[xy>=n-0.5] = xy[xy >= n-0.5]-n
+    xy[xy < -0.5] = xy[xy < -0.5] + n           # If too small, increas by n
+    xy[xy >= n - 0.5] = xy[xy >= n - 0.5] - n     # If too big, decrease by n
 
 @nb.njit
-def mask_array_np(xy,m,n):
+def mask_array_np(xy, m, n):
     '''
     Mask for non-periodic boundary conditions.
     If a value goes out of bound, its mass gets reduced to 0.
     '''
     for i in range(xy.shape[1]):
-        m[xy[:,i]<-0.5]=0
-        m[xy[:,i]>=n-0.5]=0
+        m[xy[:, i ]< -0.5] = 0      # If too small 
+        m[xy[:, i] >= n - 0.5] = 0  # If too big
 
-@nb.njit(parallel=True)
-def get_grad(xy,pot,grad, m):
+@nb.njit(parallel = True)
+def get_grad(xy, pot, grad, m):
     '''
     Function to compute the gradient of an array.
     It basically uses the slope between neighboring cell sites to create the gradient.
@@ -36,48 +36,53 @@ def get_grad(xy,pot,grad, m):
     n=pot.shape[0]
     for i in nb.prange(xy.shape[0]):
         if m[i] > 0.0:
-            if xy[i,0]<0:
-                ix0=n-1
-                ix1=0
-                fx=xy[i,0]+1
+            if xy[i, 0]<0:
+                ix0 = n - 1
+                ix1 = 0
+                fx = xy[i, 0] + 1
             else:
-                ix0=int(xy[i,0])
-                ix1=ix0+1
-                fx=xy[i,0]-ix0
-                if ix1==n:
-                    ix1=0
-            if xy[i,1]<0:
-                iy0=n-1
-                iy1=0
-                fy=xy[i,1]+1
+                ix0 = int(xy[i, 0])
+                ix1 = ix0 + 1
+                fx = xy[i, 0] - ix0
+                if ix1 == n:
+                    ix1 = 0
+            if xy[i, 1] < 0:
+                iy0 = n - 1
+                iy1 = 0 
+                fy = xy[i, 1] + 1
             else:
-                iy0=int(xy[i,1])
-                iy1=iy0+1
-                fy=xy[i,1]-iy0
-                if iy1==n:
-                    iy1=0
+                iy0 = int(xy[i, 1])
+                iy1 = iy0 + 1
+                fy = xy[i, 1] - iy0
+                if iy1 == n:
+                    iy1 = 0
 
-            grad[i,0] = (pot[ix1,iy1]-pot[ix0,iy1])*fy+(pot[ix1,iy0]-pot[ix0,iy0])*(1-fy)
-            grad[i,1] = (pot[ix1,iy1]-pot[ix1,iy0])*fx+(pot[ix0,iy1]-pot[ix0,iy0])*(1-fx)
+            grad[i, 0] = (pot[ix1, iy1] - pot[ix0, iy1]) * fy + (pot[ix1, iy0] - pot[ix0, iy0]) * (1 - fy)
+            grad[i, 1] = (pot[ix1, iy1] - pot[ix1, iy0]) * fx + (pot[ix0, iy1] - pot[ix0, iy0]) * (1 - fx)
         else:
-            grad[i,0] = 0
-            grad[i,1] = 0
+            grad[i, 0] = 0
+            grad[i, 1] = 0
 
 @nb.njit
-def hist2d_wmass(xy,mat,m):
+def hist2d_wmass(xy, mat, m):
     '''
     Creates the histogram for the density (rho) array, 
     based on the masses and positions of the particles.
     '''
-    nx=xy.shape[0]
+    nx = xy.shape[0]
     for i in range(nx):
-        ix = int(xy[i,0]+0.5)
-        iy = int(xy[i,1]+0.5)
-        if m[i] > 0: #we can set m=0 to flag particles
+        # Bins the particles in bins of width 1 centered at integer values
+        ix = int(xy[i, 0] + 0.5) 
+        iy = int(xy[i, 1] + 0.5)
+
+        if m[i] > 0:   # If mass is non zero, add to histogram
             mat[ix, iy] = mat[ix, iy] + m[i]
 
 class Particles:
-    def __init__(self,npart=10000,n=1000,soft=1,periodic=True):
+    '''Class that defines a set of particles that interact via a 1/r^2 interaction.'''
+
+    def __init__(self, npart = 10000, n = 1000, soft = 1, periodic = True):
+        '''Initializer'''
         self.x = np.empty([npart,2])        # Positions
         self.v = np.empty([npart,2])        # Velocities
         self.f = np.empty([npart,2])        # Forces
@@ -152,6 +157,7 @@ class Particles:
 
         self.kernelft=fft.rfft2(self.kernel)    # Fourier transform of kernel
 
+
     def get_rho(self):
         '''Method to get the density in a grid of the particles.'''
         if self.periodic:
@@ -165,6 +171,7 @@ class Particles:
         # Creates histogram for density array (rho)
         hist2d_wmass(self.x,self.rho,self.m)
     
+
     def get_pot(self):
         '''Method to get the potential using a convolution of kernel and density'''
         self.get_rho()
@@ -174,16 +181,19 @@ class Particles:
             n=n*2
         self.pot=fft.irfft2(rhoft*self.kernelft,[n,n])
     
+
     def get_forces(self):
         '''Get the force on every particle using the gradient of the potential.'''
         get_grad(self.x, self.pot, self.f, self.m)
     
+
     def take_step(self,dt=1):
         # Takes step using leapfrog
         self.x[:]=self.x[:]+dt*self.v
         self.get_pot()
         self.get_forces()
         self.v[:]=self.v[:]+self.f*dt
+
 
     def take_step_rk(self, dt=1):
         # Takes step using Runge-Kutta
