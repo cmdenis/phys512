@@ -76,7 +76,7 @@ def hist2d_wmass(xy,mat,m):
         if m[i] > 0: #we can set m=0 to flag particles
             mat[ix, iy] = mat[ix, iy] + m[i]
 
-class particles:
+class Particles:
     def __init__(self,npart=10000,n=1000,soft=1,periodic=True):
         self.x = np.empty([npart,2])        # Positions
         self.v = np.empty([npart,2])        # Velocities
@@ -195,8 +195,6 @@ class particles:
         self.get_pot()
         self.get_forces()
         k1 = self.f.copy()
-
-        #print(k1)
 
         # Finding k2
         self.x[:] = self.x[:] + dt*self.v/2 

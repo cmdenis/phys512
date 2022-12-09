@@ -8,7 +8,7 @@ from scipy import fft
 plt.ion()
 
 
-parts=particles(npart=1, n = 100, soft=1, periodic=False)
+parts=Particles(npart=1, n = 100, soft=1, periodic=False)
 
 parts.single_particle()
 

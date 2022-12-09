@@ -8,7 +8,7 @@ plt.ion()
 
 
 # Initializing our system with 2 particles
-parts=particles(npart=2, n = 100, soft=2 ,periodic=True)
+parts=Particles(npart=2, n = 100, soft=2 ,periodic=True)
 parts.two_particles()
 
 # Get the kernel
@@ -20,7 +20,7 @@ parts.get_pot()
 rho=parts.rho.copy()
 pot=parts.pot.copy()
 
-osamp=600    
+osamp=400    
 
 
 fig = plt.figure()
